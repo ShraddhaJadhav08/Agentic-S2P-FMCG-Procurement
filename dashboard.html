@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GoldenCrunch · Agentic S2P Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function(){
+try {
+var t = localStorage.getItem('gc-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', t);
+} catch(e) {
+document.documentElement.setAttribute('data-theme', 'dark');
+}
+})();
+</script>
+<style>
+:root{
+--bg:#FBF6EC; --bg2:#F5EDDC; --surface:#FFFFFF; --surface2:#FFF9EE;
+--border:#EBDDC2; --text:#2B1A12; --muted:#80705F;
+--red:#B5231B; --red-soft:#FBE4E1; --gold:#C8961A; --gold-soft:#FBF0D2;
+--yellow:#F2B51D; --green:#2E8B57; --green-soft:#DDF3E6;
+--shadow:0 1px 2px rgba(80,40,10,.06), 0 8px 24px -12px rgba(80,40,10,.15);
+--shadow-hover:0 2px 4px rgba(80,40,10,.08), 0 18px 36px -14px rgba(120,40,10,.28);
+--grid:#EFE3CB; --tick:#80705F; --input:#FFFDF8;
+}
+[data-theme="dark"]{
+--bg:#130D0A; --bg2:#1A120E; --surface:#1E1512; --surface2:#251A16; --border:#35261F;
+--text:#F6ECDE; --muted:#AA9888;
+--red:#EE5246; --red-soft:#3A1713; --gold:#E4B450; --gold-soft:#33260F; --yellow:#F7C948;
+--green:#4CC38A; --green-soft:#122A1F;
+--shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+--shadow-hover:0 2px 4px rgba(0,0,0,.5), 0 18px 36px -14px rgba(0,0,0,.8);
+--grid:#2D211B; --tick:#AA9888; --input:#17100D;
+}
+*{ box-sizing:border-box; }html{ scroll-behavior:smooth; }
+body{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;
+font-feature-settings:'cv11','ss01'; -webkit-font-smoothing:antialiased; transition:background .3s,
+color .3s; }
+h1,h2,h3,.display{ font-family:'Sora','Inter',sans-serif; letter-spacing:-.01em; color:var(--text); }
+.mono{ font-family:'JetBrains Mono',ui-monospace,monospace;
+font-variant-numeric:tabular-nums; }
+::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:var(--border);
+border-radius:8px; } ::-webkit-scrollbar-track{ background:transparent; }
+.sidebar{ background:linear-gradient(180deg,#5A120E 0%,#3A0B09 100%); color:#F8E9D2; }
+[data-theme="dark"] .sidebar{ background:linear-gradient(180deg,#2A0A08 0%,#170605
+100%); border-right:1px solid #3a1b15; }
+.nav-item{ display:flex; align-items:center; gap:.75rem; padding:.62rem .8rem;
+border-radius:.7rem; font-size:.86rem; font-weight:500; color:#E9D3B4; cursor:pointer;
+position:relative; transition:all .2s; border:0; background:transparent; width:100%; text-align:left;
+}
+.nav-item:hover{ background:rgba(255,255,255,.07); color:#fff; transform:translateX(2px); }
+.nav-item.active{
+background:linear-gradient(90deg,rgba(242,181,29,.22),rgba(242,181,29,.04)); color:#FFD76A;
+}
+.nav-item.active::before{ content:''; position:absolute; left:-12px; top:20%; height:60%;
+width:4px; border-radius:0 4px 4px 0; background:var(--yellow); }
+.nav-item .pill{ margin-left:auto; font-size:.65rem; padding:.1rem .45rem; border-radius:999px;
+background:rgba(255,255,255,.12); }
+.card{ background:var(--surface); border:1px solid var(--border); border-radius:1rem;
+box-shadow:var(--shadow); color:var(--text); transition:transform .25s, box-shadow .25s,
+border-color .25s, background .3s; }
+.card.lift:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover);
+border-color:color-mix(in srgb,var(--gold) 45%,var(--border)); }
+.card-title{ font-family:'Sora'; font-weight:600; font-size:.95rem; color:var(--text); }
+.eyebrow{ font-size:.68rem; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+font-weight:600; }
+.muted{ color:var(--muted); }
+.field{ width:100%; background:var(--input); border:1px solid var(--border); color:var(--text);
+border-radius:.65rem; padding:.55rem .75rem; font-size:.85rem; outline:none;
+transition:border-color .2s, box-shadow .2s; }
+.field:focus{ border-color:var(--gold); box-shadow:0 0 0 3px color-mix(in srgb,var(--yellow)
+30%,transparent); }
+label.lbl{ display:block; font-size:.7rem; font-weight:600; color:var(--muted);
+margin-bottom:.3rem; letter-spacing:.02em; }.btn{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:600;
+font-size:.82rem; padding:.58rem 1rem; border-radius:.7rem; border:1px solid transparent;
+cursor:pointer; transition:transform .15s, box-shadow .2s, background .2s, filter .2s;
+position:relative; overflow:hidden; }
+.btn:active{ transform:scale(.97); }
+.btn:disabled{ opacity:.65; cursor:not-allowed; }
+.btn-primary{ background:linear-gradient(135deg,var(--red),#8E1712); color:#fff; box-shadow:0
+6px 16px -6px color-mix(in srgb,var(--red) 70%,transparent); }
+.btn-primary:hover:not(:disabled){ filter:brightness(1.1); box-shadow:0 10px 22px -8px
+color-mix(in srgb,var(--red) 80%,transparent); }
+.btn-gold{ background:linear-gradient(135deg,var(--yellow),var(--gold)); color:#3a2300; }
+.btn-gold:hover:not(:disabled){ filter:brightness(1.07); }
+.btn-green{ background:linear-gradient(135deg,#3BA66D,var(--green)); color:#fff; }
+.btn-ghost{ background:var(--surface); border-color:var(--border); color:var(--text); }
+.btn-ghost:hover{ border-color:var(--gold); background:var(--surface2); }
+.icon-btn{ width:2.3rem; height:2.3rem; display:inline-flex; align-items:center;
+justify-content:center; border-radius:.7rem; background:var(--surface); border:1px solid
+var(--border); color:var(--text); cursor:pointer; transition:all .2s; position:relative; }
+.icon-btn:hover{ border-color:var(--gold); transform:translateY(-1px);
+background:var(--surface2); }
+.ripple{ position:absolute; border-radius:50%; background:rgba(255,255,255,.45);
+transform:scale(0); animation:ripple .6s linear; pointer-events:none; }
+@keyframes ripple{ to{ transform:scale(4); opacity:0; } }
+.badge{ display:inline-flex; align-items:center; gap:.35rem; font-size:.68rem; font-weight:600;
+padding:.22rem .6rem; border-radius:999px; border:1px solid transparent; }
+.b-red{ background:var(--red-soft); color:var(--red); border-color:color-mix(in srgb,var(--red)
+25%,transparent); }
+.b-gold{ background:var(--gold-soft); color:var(--gold); border-color:color-mix(in srgb,var(--gold)
+30%,transparent); }
+.b-green{ background:var(--green-soft); color:var(--green); border-color:color-mix(in
+srgb,var(--green) 28%,transparent); }
+.b-muted{ background:var(--bg2); color:var(--muted); border-color:var(--border); }
+.dot{ width:.5rem; height:.5rem; border-radius:50%; background:currentColor;
+display:inline-block; }
+.pulse{ animation:pulse 1.8s infinite; }
+@keyframes pulse{ 0%{ box-shadow:0 0 0 0 color-mix(in srgb,currentColor 55%,transparent);}
+70%{ box-shadow:0 0 0 7px transparent;} 100%{ box-shadow:0 0 0 0 transparent;} }
+/* AI Voice Visualizer Waveform */
+.voice-wave { display: inline-flex; align-items: center; justify-content: center; gap: 2.5px; height:
+14px; }
+.voice-bar { width: 2.5px; background: #fff; border-radius: 2px; animation: voiceWave 0.6s
+ease-in-out infinite alternate; }.voice-bar:nth-child(1) { height: 4px; animation-delay: 0.1s; }
+.voice-bar:nth-child(2) { height: 13px; animation-delay: 0.25s; }
+.voice-bar:nth-child(3) { height: 7px; animation-delay: 0.4s; }
+.voice-bar:nth-child(4) { height: 14px; animation-delay: 0.15s; }
+@keyframes voiceWave { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1); } }
+.voice-active { box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 35%, transparent)
+!important; }
+/* Map Corridor Animations */
+.corridor-flow { stroke-dasharray: 7 5; animation: dashFlow 1.3s linear infinite; }
+.corridor-rail { stroke-dasharray: 4 4; animation: dashFlow 1.8s linear infinite; }
+@keyframes dashFlow { to { stroke-dashoffset: -24; } }
+.hub-pulse { animation: hubRing 2.2s ease-out infinite; transform-origin: center; }
+@keyframes hubRing { 0% { r: 7; opacity: 0.85; } 100% { r: 24; opacity: 0; } }
+.map-node { cursor: pointer; transition: transform 0.2s; }
+.map-node:hover { filter: brightness(1.2); }
+/* Halo behind map labels so they stay readable over the sea */
+#indiaCorridorSvg text:not(.sea){ paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }
+table.t{ width:100%; font-size:.8rem; border-collapse:separate; border-spacing:0; }
+table.t th{ text-align:left; font-size:.66rem; letter-spacing:.08em; text-transform:uppercase;
+color:var(--muted); font-weight:600; padding:.65rem .75rem; border-bottom:1px solid
+var(--border); position:sticky; top:0; background:var(--surface); z-index:1; }
+table.t td{ padding:.7rem .75rem; border-bottom:1px solid color-mix(in srgb,var(--border)
+60%,transparent); color:var(--text); }
+table.t tbody tr{ transition:background .15s; }
+table.t tbody tr:hover{ background:var(--surface2); }
+@keyframes flashRow{ 0%{ background:color-mix(in srgb,var(--yellow) 45%,transparent);}
+100%{ background:transparent;} }
+tr.flash{ animation:flashRow 2.4s ease-out; }
+.view{ display:none; animation:fadeUp .4s ease both; } .view.active{ display:block; }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1;
+transform:none;} }
+.stagger > *{ animation:fadeUp .5s ease both; }
+.stagger > *:nth-child(2){ animation-delay:.05s } .stagger > *:nth-child(3){ animation-delay:.1s }
+.stagger > *:nth-child(4){ animation-delay:.15s } .stagger > *:nth-child(5){ animation-delay:.2s }
+.skel{ background:linear-gradient(90deg,var(--bg2) 25%,var(--surface2) 37%,var(--bg2) 63%);
+background-size:400% 100%; animation:skel 1.3s ease infinite; border-radius:.5rem;
+color:transparent !important; }
+@keyframes skel{ 0%{ background-position:100% 50%;} 100%{ background-position:0 50%;} }
+.bar{ height:.5rem; background:var(--bg2); border-radius:999px; overflow:hidden;
+position:relative; }.bar > span{ display:block; height:100%; border-radius:999px; transition:width 1s
+cubic-bezier(.2,.8,.2,1); }
+.step{ display:flex; gap:.75rem; align-items:flex-start; position:relative; padding-bottom:1rem; }
+.step:not(:last-child)::after{ content:''; position:absolute; left:1.05rem; top:2.3rem; bottom:0;
+width:2px; background:var(--border); }
+.step .ico{ width:2.1rem; height:2.1rem; border-radius:50%; display:flex; align-items:center;
+justify-content:center; background:var(--bg2); color:var(--muted); border:1px solid var(--border);
+flex-shrink:0; transition:all .3s; }
+.step.running .ico{ background:var(--gold-soft); color:var(--gold); border-color:var(--gold);
+animation:pulse 1.2s infinite; }
+.step.done .ico{ background:var(--green); color:#fff; border-color:var(--green); }
+.step.fail .ico{ background:var(--red); color:#fff; border-color:var(--red); }
+.step.done:not(:last-child)::after{ background:var(--green); }
+#toasts{ position:fixed; right:1rem; bottom:1rem; display:flex; flex-direction:column; gap:.6rem;
+z-index:100; }
+.toast{ min-width:260px; max-width:360px; background:var(--surface); border:1px solid
+var(--border); border-left:4px solid var(--gold); border-radius:.8rem; padding:.7rem .9rem;
+box-shadow:var(--shadow-hover); font-size:.8rem; color:var(--text); animation:toastIn .35s
+cubic-bezier(.2,.9,.3,1.2) both; }
+.toast.ok{ border-left-color:var(--green);} .toast.err{ border-left-color:var(--red);}
+@keyframes toastIn{ from{ opacity:0; transform:translateX(30px) scale(.96);} to{ opacity:1;
+transform:none;} }
+#palette{ position:fixed; inset:0; background:rgba(20,8,4,.55); backdrop-filter:blur(4px);
+display:none; align-items:flex-start; justify-content:center; padding-top:14vh; z-index:90; }
+#palette.open{ display:flex; animation:fadeUp .2s ease; }
+.pal-item{ display:flex; align-items:center; gap:.7rem; padding:.6rem .8rem;
+border-radius:.6rem; cursor:pointer; font-size:.85rem; color:var(--text); }
+.pal-item:hover,.pal-item.sel{ background:var(--gold-soft); color:var(--gold); }
+.ticker{ display:flex; gap:2.2rem; white-space:nowrap; animation:marquee 38s linear infinite; }
+.ticker:hover{ animation-play-state:paused; }
+@keyframes marquee{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+.spin-slow{ animation:spin 14s linear infinite; transform-origin:center; } @keyframes spin{ to{
+transform:rotate(360deg);} }
+.float{ animation:float 4s ease-in-out infinite; } @keyframes float{ 50%{
+transform:translateY(-4px);} }
+.rain-drop{ animation:drop 1s linear infinite; } @keyframes drop{ from{
+transform:translateY(-3px); opacity:0;} 30%{opacity:1;} to{ transform:translateY(5px); opacity:0;}
+}.bolt{ animation:flicker 2.2s infinite; } @keyframes flicker{ 0%,90%,100%{ opacity:1;} 93%{
+opacity:.2;} 96%{ opacity:1;} }
+.gradient-brand{ background:linear-gradient(120deg,var(--red) 0%,#D9641E 45%,var(--yellow)
+100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero{ background:radial-gradient(1200px 300px at 90% -20%,color-mix(in srgb,var(--yellow)
+28%,transparent),transparent 60%), radial-gradient(800px 260px at 0% 120%,color-mix(in
+srgb,var(--red) 18%,transparent),transparent 60%), var(--surface); }
+pre.po{ background:var(--input); border:1px dashed color-mix(in srgb,var(--gold)
+55%,var(--border)); color:var(--text); }
+.kbd{ font-family:'JetBrains Mono'; font-size:.65rem; padding:.1rem .35rem; border:1px solid
+var(--border); border-bottom-width:2px; border-radius:.35rem; background:var(--bg2);
+color:var(--muted); }
+@media (max-width:1023px){ .sidebar{ position:fixed; z-index:60; transform:translateX(-100%);
+transition:transform .3s; } .sidebar.open{ transform:none; } }
+</style>
+</head>
+<body>
+<div class="flex min-h-screen">
+<!-- SIDEBAR -->
+<aside id="sidebar" class="sidebar w-64 shrink-0 p-4 flex flex-col gap-1 lg:sticky lg:top-0
+lg:h-screen">
+<div class="flex items-center gap-3 px-2 pt-1 pb-5">
+<div class="w-10 h-10 rounded-xl flex items-center justify-center"
+style="background:linear-gradient(135deg,#F2B51D,#C8961A);box-shadow:0 6px 16px -6px
+rgba(242,181,29,.7)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A120E"
+stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10"
+r=".8" fill="#5A120E"/><circle cx="14" cy="9" r=".8" fill="#5A120E"/><circle cx="13" cy="14"
+r=".8" fill="#5A120E"/><circle cx="8.5" cy="14.5" r=".8" fill="#5A120E"/></svg>
+</div>
+<div>
+<div class="display font-bold text-white leading-tight">GoldenCrunch</div>
+<div class="text-[11px]" style="color:#E9C37A">Biscuits · Supply Chain AI</div>
+</div>
+</div>
+<div class="eyebrow px-3 mb-1" style="color:#C9A56A">Operations</div>
+<nav class="flex flex-col gap-1" id="nav"></nav>
+<div class="mt-auto">
+<div class="rounded-xl p-3 mb-3" style="background:rgba(255,255,255,.06);border:1px solid
+rgba(255,255,255,.08)"><div class="flex items-center justify-between text-[11px]" style="color:#E9D3B4">
+<span>Agent Mesh</span><span id="sbAgents" class="font-semibold text-[#8BE3B1]">4
+/ 4 online</span>
+</div>
+<div class="bar mt-2" style="background:rgba(255,255,255,.12)"><span id="sbAgentBar"
+style="width:100%;background:linear-gradient(90deg,#4CC38A,#F2B51D)"></span></div>
+<div class="text-[10px] mt-2" style="color:#C9A56A">LangGraph · Claude MCP ·
+PostgreSQL</div>
+</div>
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+style="background:#F2B51D;color:#4a1410">MD</div>
+<div class="leading-tight">
+<div class="text-sm font-semibold text-white">Manager's Dashboard</div>
+<div class="text-[11px]" style="color:#C9A56A">Procurement · Mumbai</div>
+</div>
+</div>
+</div>
+</aside>
+<div id="scrim" class="fixed inset-0 bg-black/50 z-50 hidden lg:hidden"
+onclick="toggleSidebar()"></div>
+<!-- MAIN -->
+<div class="flex-1 min-w-0 flex flex-col">
+<header class="sticky top-0 z-40 flex items-center gap-3 px-4 md:px-7 py-3 border-b"
+style="background:color-mix(in srgb,var(--bg)
+85%,transparent);backdrop-filter:blur(12px);border-color:var(--border)">
+<button class="icon-btn lg:hidden" onclick="toggleSidebar()" aria-label="Menu"><span
+data-i="menu"></span></button>
+<div class="min-w-0">
+<div class="eyebrow" id="crumb">Command Center</div>
+<h1 class="text-lg md:text-xl font-bold leading-tight truncate" id="pageTitle">Operations
+Overview</h1>
+</div>
+<button onclick="openPalette()" class="hidden md:flex items-center gap-2 ml-6 flex-1
+max-w-sm field !py-2 text-left muted" style="cursor:pointer">
+<span data-i="search" class="opacity-70"></span><span class="text-sm">Search or jump
+to…</span><span class="ml-auto"><span class="kbd">Ctrl</span> <span
+class="kbd">K</span></span>
+</button>
+<div class="ml-auto flex items-center gap-2">
+<div class="hidden xl:flex flex-col items-end leading-tight mr-2"><span id="clock" class="mono text-sm font-semibold">--:--:--</span>
+<span id="dateLabel" class="text-[11px] muted">--</span>
+</div>
+<span id="dbStatusBadge" class="badge b-green hidden sm:inline-flex"><span class="dot
+pulse"></span><span id="dbStatusText">PostgreSQL Live</span></span>
+<select id="weatherLocationSelect" onchange="syncEnv('top')" class="field !w-auto !py-2
+hidden md:block">
+<option value="Mumbai">Mumbai</option>
+<option value="Delhi">Delhi</option>
+<option value="Mumbai_STORM">Mumbai · Monsoon Storm (Sim)</option>
+</select>
+<button class="icon-btn" onclick="refreshAll(true)" title="Refresh" id="refreshBtn"><span
+data-i="refresh"></span></button>
+<button class="icon-btn" onclick="toggleNotifs()" title="Manager Alerts"><span
+data-i="bell"></span><span id="notifDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full
+hidden" style="background:var(--red)"></span></button>
+<button class="icon-btn" onclick="toggleTheme()" title="Toggle theme"
+id="themeBtn"><span id="themeIcon"></span></button>
+</div>
+</header>
+<div id="notifPanel" class="card hidden fixed right-4 top-16 w-80 z-50 p-3 max-h-[70vh] flex
+flex-col shadow-2xl">
+<div class="flex justify-between items-center mb-3"><span class="card-title">Manager
+Alerts</span><button class="text-xs muted hover:underline"
+onclick="clearManagerNotifs()">Clear All</button></div>
+<div id="notifList" class="space-y-2 text-xs flex-1 overflow-y-auto"></div>
+</div>
+<!-- Scrolling Ticker -->
+<div class="overflow-hidden border-b py-2 px-4"
+style="border-color:var(--border);background:var(--surface)">
+<div id="tickerWrap" class="flex items-center gap-3">
+<span class="badge b-gold shrink-0"><span data-i="trend" data-s="12"></span> LIVE
+INDICES</span>
+<div class="overflow-hidden flex-1"><div id="tickerTrack" class="ticker text-xs
+mono"></div></div>
+</div>
+</div>
+<main class="p-4 md:p-7 flex-1">
+<!-- ===================== VIEW 1: OVERVIEW ===================== -->
+<section id="view-overview" class="view active space-y-6">
+<div class="card hero p-6 flex flex-col md:flex-row md:items-center justify-between gap-5"><div>
+<span class="badge b-gold mb-3"><span data-i="shield" data-s="12"></span>
+Enterprise S2P Governance · Zero-Trust Ledger</span>
+<h2 class="text-2xl md:text-3xl font-extrabold leading-tight">Predictive Supply
+Intelligence. <span class="gradient-brand">Zero Production Downtime.</span></h2>
+<p class="text-sm mt-2.5 max-w-2xl font-medium leading-relaxed muted">Orchestrating
+enterprise raw-material flow through live commodity telemetry, multi-criteria vendor arbitration,
+and deterministic financial governance.</p>
+</div>
+<div class="grid grid-cols-2 gap-3 shrink-0 md:w-72">
+<div class="rounded-xl p-3" style="background:var(--surface2);border:1px solid
+var(--border)"><div class="eyebrow">Sync</div><div class="mono text-lg font-semibold"
+id="syncAge">0s</div><div class="text-[11px] muted">since last pull</div></div>
+<div class="rounded-xl p-3" style="background:var(--surface2);border:1px solid
+var(--border)"><div class="eyebrow">Mode</div><div class="text-lg font-semibold"
+id="modeLabel">Live</div><div class="text-[11px] muted" id="modeSub">API
+connected</div></div>
+</div>
+</div>
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 stagger" id="kpiGrid"></div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 stagger">
+<div class="card lift p-5">
+<div class="flex justify-between items-start">
+<div class="eyebrow">Regional Weather Telemetry</div>
+<span id="weatherRiskBadge" class="badge b-muted">Risk --</span>
+</div>
+<div class="flex items-center gap-4 mt-3">
+<div id="weatherIcon" class="w-16 h-16 shrink-0"></div>
+<div class="min-w-0">
+<div id="weatherTemp" class="display text-3xl font-bold leading-none">--°</div>
+<h3 id="weatherCondition" class="text-sm font-semibold mt-1
+truncate">Loading…</h3>
+<p id="weatherMeta" class="text-xs muted mt-0.5">Fetching Open-Meteo feed…</p>
+</div>
+</div>
+<div class="mt-4">
+<div class="flex justify-between text-[11px] muted mb-1"><span>Delivery
+risk</span><span id="weatherRiskPct" class="mono">--%</span></div>
+<div class="bar"><span id="weatherRiskBar"
+style="width:0;background:var(--green)"></span></div>
+</div><p id="weatherSource" class="text-[11px] muted mt-3 flex items-center gap-1.5"><span
+class="dot" style="color:var(--green)"></span><span>--</span></p>
+</div>
+<div class="card lift p-5">
+<div class="flex justify-between items-start">
+<div class="eyebrow">Brent Crude & Fuel Multiplier</div>
+<span id="fuelMultiplierBadge" class="badge b-gold">--x</span>
+</div>
+<div class="flex items-center gap-4 mt-3">
+<div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+style="background:var(--gold-soft);color:var(--gold)"><span data-i="fuel"
+data-s="32"></span></div>
+<div>
+<div id="fuelPrice" class="display text-3xl font-bold leading-none">₹--</div>
+<p class="text-xs muted mt-1">per litre · diesel</p>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 mt-4 text-center">
+<div class="rounded-lg p-2" style="background:var(--bg2)"><div class="text-[10px]
+muted">Road</div><div class="mono text-sm font-semibold" id="frRoad">₹4.50</div></div>
+<div class="rounded-lg p-2" style="background:var(--bg2)"><div class="text-[10px]
+muted">Rail</div><div class="mono text-sm font-semibold" id="frRail">₹2.00</div></div>
+<div class="rounded-lg p-2" style="background:var(--bg2)"><div class="text-[10px]
+muted">Express</div><div class="mono text-sm font-semibold" id="frExp">₹5.20</div></div>
+</div>
+<p id="fuelSource" class="text-[11px] muted mt-3 flex items-center gap-1.5"><span
+class="dot" style="color:var(--green)"></span><span>--</span></p>
+</div>
+<div class="card lift p-5">
+<div class="eyebrow mb-3">Live Commodity Indices · INR / Ton</div>
+<div id="commodityGrid" class="grid grid-cols-2 gap-2 text-xs"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+<div class="card p-5 xl:col-span-2">
+<div class="flex justify-between items-center mb-3">
+<div><h3 class="card-title">Raw Material Stock Health</h3><p class="text-xs
+muted">Current stock vs safety stock vs reorder point (tons)</p></div>
+<span class="badge b-green"><span class="dot pulse"></span> Realtime</span>
+</div>
+<div style="height:280px"><canvas id="stockChart"></canvas></div></div>
+<div class="card p-5">
+<h3 class="card-title mb-1">Spend by Vendor</h3>
+<p class="text-xs muted mb-3">Committed landed cost</p>
+<div style="height:210px"><canvas id="spendChart"></canvas></div>
+<div id="spendLegend" class="mt-3 space-y-1.5 text-xs"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+<div class="card p-5 xl:col-span-2">
+<div class="flex justify-between items-center mb-3"><h3 class="card-title">Agent Mesh
+Status</h3><span class="text-xs muted">LangGraph · MCP</span></div>
+<div id="agentCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+</div>
+<div class="card p-5">
+<h3 class="card-title mb-3">Live Activity Feed</h3>
+<div id="activityFeed" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+</div>
+</div>
+</section>
+<!-- ===================== VIEW 2: AI COPILOT ===================== -->
+<section id="view-copilot" class="view space-y-6">
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 stagger">
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Total Savings
+Unlocked</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-green"><span
+data-i="coins" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3" id="copKpiSavings"
+style="color:var(--green)">₹0</div>
+<div class="text-xs muted mt-1">Slab + Rail Modal Arbitrage</div>
+</div>
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Critical
+Stockouts</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-red"><span
+data-i="alert" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3" id="copKpiCrit"
+style="color:var(--red)">0</div>
+<div class="text-xs muted mt-1">Cover &lt; Vendor Lead Time</div>
+</div>
+<div class="card lift p-5"><div class="flex justify-between items-start"><div class="eyebrow">Optimal Batch
+Volume</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-gold"><span
+data-i="boxes" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3" id="copKpiTons">0 T</div>
+<div class="text-xs muted mt-1">Across active dispatches</div>
+</div>
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Live AI Telemetry
+Stream</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-gold"><span
+data-i="bot" data-s="18"></span></span></div>
+<div class="mono text-base font-bold mt-3 truncate" id="copilotSourceBadge"
+style="color:var(--gold)">CLAUDE_MCP</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-xs muted">Synced with PostgreSQL</span>
+<button class="text-xs font-semibold underline" style="color:var(--gold)"
+onclick="loadCopilotInsights()">Sync Now</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<div class="card p-5 lg:col-span-4">
+<div class="flex justify-between items-center mb-3">
+<div><h3 class="card-title">Savings by Optimization</h3><p class="text-xs
+muted">INR value unlocked per action</p></div>
+<span class="badge b-green">INR</span>
+</div>
+<div style="height:220px"><canvas id="copilotSavingsChart"></canvas></div>
+</div>
+<div class="card p-5 lg:col-span-4">
+<div class="flex justify-between items-center mb-3">
+<div><h3 class="card-title">Stock Cover vs. Fastest SLA</h3><p class="text-xs
+muted">Factory cover (d) vs vendor delivery (d)</p></div>
+<span class="badge b-red">SLA Gap</span>
+</div>
+<div style="height:220px"><canvas id="copilotCoverChart"></canvas></div>
+</div>
+<div class="card p-5 lg:col-span-4 flex flex-col">
+<div class="flex justify-between items-center mb-3">
+<div><h3 class="card-title">Risk Breakdown</h3><p class="text-xs
+muted">Share of live risk by driver</p></div>
+<span class="badge b-gold">Interactive</span>
+</div>
+<div class="relative w-full mx-auto" style="height:170px">
+<canvas id="copilotRiskDoughnut"></canvas>
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<span id="riskCenterVal" class="display text-2xl font-bold">--</span>
+<span id="riskCenterLbl" class="text-[10px] muted uppercase tracking-wider">Avg risk</span>
+</div>
+</div>
+<div id="riskLegend" class="grid grid-cols-2 gap-1.5 mt-3 text-xs"></div>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="card-title">1-Click Autonomous Dispatch Queue (Direct Claude
+Stream)</h3>
+<span class="text-xs muted">Click any action button to auto-launch the 4-Agent
+Pipeline</span>
+</div>
+<div id="copilotGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 stagger"></div>
+</div>
+</section>
+<!-- ===================== VIEW 3: DEDICATED LOGISTICS & TRANSPORTATION
+NETWORK SCREEN ===================== -->
+<section id="view-logistics" class="view space-y-6">
+<!-- Top Logistics KPIs -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 stagger">
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Active Supply
+Corridors</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-gold"><span
+data-i="map" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3">6 Hubs</div>
+<div class="text-xs muted mt-1">Inbound to Mumbai Plant</div>
+</div>
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Diesel Index &
+Multiplier</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-gold"><span
+data-i="fuel" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3" id="logFuelKpi">₹--</div>
+<div class="text-xs muted mt-1" id="logMultKpi">1.17× Freight Multiplier</div>
+</div>
+<div class="card lift p-5">
+<div class="flex justify-between items-start"><div class="eyebrow">Rail vs Road
+Savings</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-green"><span
+data-i="coins" data-s="18"></span></span></div>
+<div class="display text-2xl md:text-3xl font-bold mt-3"
+style="color:var(--green)">55.6%</div>
+<div class="text-xs muted mt-1">₹2.00 vs ₹4.50 base/t-km</div>
+</div>
+<div class="card lift p-5"><div class="flex justify-between items-start"><div class="eyebrow">Corridor Weather
+Status</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-green"
+id="logWxIconWrap"><span data-i="wind" data-s="18"></span></span></div>
+<div class="display text-xl md:text-2xl font-bold mt-3 truncate"
+id="logCorridorState">Optimal</div>
+<div class="text-xs muted mt-1" id="logDelaySub">+0d transit delay</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+<!-- Interactive India Supply Corridor SVG Map -->
+<div class="card p-5 xl:col-span-7 flex flex-col justify-between">
+<div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+<div>
+<h3 class="card-title">India Multi-Modal Supply Chain Corridor Map</h3>
+<p class="text-xs muted">Click any supplier origin node to inspect live Road, Rail &
+Express freight economics</p>
+</div>
+<span id="corridorStatusBadge" class="badge b-green">All Routes Clear</span>
+</div>
+<div class="rounded-xl p-4 relative flex items-center justify-center overflow-hidden"
+style="background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 55%), linear-gradient(180deg,#1C7DB8 0%,#0E5A8C 60%,#0A4A75 100%); border:1px solid #0B4A75;
+min-height:420px">
+<svg id="indiaCorridorSvg" viewBox="0 0 520 460" class="w-full h-[400px]">
+<defs>
+<radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="var(--red)" stop-opacity="0.55"/>
+<stop offset="100%" stop-color="var(--red)" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<!-- Subtle Lat/Long Telemetry Grid -->
+<g stroke="#8CC8EA" stroke-width="0.6" stroke-dasharray="3 3" opacity="0.35">
+<line x1="0" y1="90" x2="520" y2="90"/><line x1="0" y1="180" x2="520" y2="180"/>
+<line x1="0" y1="270" x2="520" y2="270"/><line x1="0" y1="360" x2="520"
+y2="360"/>
+<line x1="120" y1="0" x2="120" y2="460"/><line x1="240" y1="0" x2="240"
+y2="460"/>
+<line x1="360" y1="0" x2="360" y2="460"/>
+</g>
+<!-- Stylized Western/Central/Southern India Peninsula Silhouette --><path d="M165,25 L245,35 L295,85 L375,115 L415,175 L365,255 L305,335
+L255,435 L215,430 L185,345 L155,260 L145,195 L95,165 L75,125 L125,90 Z"
+fill="var(--surface)" stroke="var(--border)" stroke-width="2" opacity="0.92"/>
+<!-- Arabian Sea / Bay of Bengal Labels -->
+<text class="sea" x="22" y="295" fill="#D6EEFA" font-size="10" font-family="JetBrains Mono"
+opacity="0.85">ARABIAN SEA</text>
+<text class="sea" x="370" y="340" fill="#D6EEFA" font-size="10" font-family="JetBrains Mono"
+opacity="0.85">BAY OF BENGAL</text>
+<!-- ACTIVE TRANSIT CORRIDOR LINES INTO MUMBAI HUB (x=155, y=235) -->
+<!-- 1. Ahmedabad/Kandla -> Mumbai (Palm Oil, 610km) -->
+<path id="route-ahmedabad" d="M125,135 Q132,185 155,235" fill="none"
+stroke="var(--gold)" stroke-width="2.6" class="corridor-flow"/>
+<!-- 2. Indore -> Mumbai (Wheat Flour, 585km) -->
+<path id="route-indore" d="M225,145 Q185,185 155,235" fill="none"
+stroke="var(--yellow)" stroke-width="2.6" class="corridor-flow"/>
+<!-- 3. Nagpur -> Mumbai (Bulk Corn Rail Corridor, 790km) -->
+<path id="route-nagpur" d="M305,190 Q230,210 155,235" fill="none"
+stroke="var(--green)" stroke-width="2.8" class="corridor-rail"/>
+<!-- 4. Pune/Baramati -> Mumbai (Refined Sugar, 245km) -->
+<path id="route-pune" d="M198,258 L155,235" fill="none" stroke="var(--gold)"
+stroke-width="2.6" class="corridor-flow"/>
+<!-- 5. Ratnagiri -> Mumbai (Corrugated Cartons, 330km) -->
+<path id="route-ratnagiri" d="M168,305 L155,235" fill="none" stroke="var(--green)"
+stroke-width="2.4" class="corridor-flow"/>
+<!-- 6. Kochi -> Mumbai (Cocoa Beans, 1150km) -->
+<path id="route-kochi" d="M222,405 Q180,325 155,235" fill="none"
+stroke="var(--yellow)" stroke-width="2.6" class="corridor-flow"/>
+<!-- SUPPLIER ORIGIN NODES (Interactive) -->
+<g class="map-node" onclick="selectCorridorNode(0)">
+<circle cx="125" cy="135" r="7" fill="var(--surface)" stroke="var(--gold)"
+stroke-width="2.5"/>
+<text x="32" y="130" fill="var(--text)" font-size="10.5" font-weight="700">Ahmedabad
+/ Kandla</text>
+<text x="32" y="142" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Palm Oil · 610 km</text>
+</g>
+<g class="map-node" onclick="selectCorridorNode(1)">
+<circle cx="225" cy="145" r="7" fill="var(--surface)" stroke="var(--yellow)"
+stroke-width="2.5"/><text x="237" y="142" fill="var(--text)" font-size="10.5" font-weight="700">Indore
+Hub</text>
+<text x="237" y="154" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Wheat Flour · 585 km</text>
+</g>
+<g class="map-node" onclick="selectCorridorNode(2)">
+<circle cx="305" cy="190" r="7" fill="var(--surface)" stroke="var(--green)"
+stroke-width="2.5"/>
+<text x="317" y="188" fill="var(--text)" font-size="10.5" font-weight="700">Nagpur
+Rail Hub</text>
+<text x="317" y="200" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Bulk Corn · 790 km</text>
+</g>
+<g class="map-node" onclick="selectCorridorNode(3)">
+<circle cx="198" cy="258" r="7" fill="var(--surface)" stroke="var(--gold)"
+stroke-width="2.5"/>
+<text x="210" y="256" fill="var(--text)" font-size="10.5" font-weight="700">Pune /
+Baramati</text>
+<text x="210" y="268" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Refined Sugar · 245 km</text>
+</g>
+<g class="map-node" onclick="selectCorridorNode(4)">
+<circle cx="168" cy="305" r="7" fill="var(--surface)" stroke="var(--green)"
+stroke-width="2.5"/>
+<text x="180" y="304" fill="var(--text)" font-size="10.5" font-weight="700">Ratnagiri /
+Konkan</text>
+<text x="180" y="316" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Packaging · 330 km</text>
+</g>
+<g class="map-node" onclick="selectCorridorNode(5)">
+<circle cx="222" cy="405" r="7" fill="var(--surface)" stroke="var(--yellow)"
+stroke-width="2.5"/>
+<text x="234" y="403" fill="var(--text)" font-size="10.5" font-weight="700">Kochi /
+Malabar</text>
+<text x="234" y="415" fill="var(--muted)" font-size="9" font-family="JetBrains
+Mono">Cocoa Beans · 1150 km</text>
+</g>
+<!-- MUMBAI FACTORY DESTINATION HUB -->
+<circle cx="155" cy="235" r="26" fill="url(#hubGlow)"/><circle cx="155" cy="235" r="10" fill="none" stroke="var(--red)" stroke-width="2"
+class="hub-pulse"/>
+<circle cx="155" cy="235" r="8" fill="var(--red)" stroke="#fff" stroke-width="2.2"/>
+<rect x="24" y="218" width="118" height="32" rx="6" fill="var(--surface)"
+stroke="var(--red)" stroke-width="1.5"/>
+<text x="32" y="232" fill="var(--text)" font-size="10" font-weight="800">MUMBAI
+PLANT</text>
+<text x="32" y="244" fill="var(--gold)" font-size="8.5" font-family="JetBrains
+Mono">Central S2P Hub</text>
+</svg>
+</div>
+<!-- Legend Footer -->
+<div class="flex flex-wrap items-center justify-between gap-3 mt-3 text-xs muted">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5"><i class="w-3 h-0.5 inline-block"
+style="background:var(--gold)"></i> Highway Road (₹4.50/t-km)</span>
+<span class="flex items-center gap-1.5"><i class="w-3 h-0.5 inline-block"
+style="background:var(--green)"></i> Dedicated Rail (₹2.00/t-km)</span>
+<span class="flex items-center gap-1.5"><i class="w-3 h-0.5 inline-block"
+style="background:var(--red)"></i> Monsoon Delay Alert</span>
+</div>
+<span class="mono text-[11px]">Click any city node to inspect</span>
+</div>
+</div>
+<!-- Corridor Inspector & Live Multi-Modal Freight Table -->
+<div class="xl:col-span-5 space-y-5">
+<div class="card p-5" id="corridorInspectorCard">
+<div class="flex justify-between items-start mb-3">
+<div>
+<div class="eyebrow">Selected Corridor Telemetry</div>
+<h3 class="card-title text-base mt-0.5" id="inspCorridorTitle">Indore → Mumbai
+Plant</h3>
+</div>
+<span class="badge b-gold mono" id="inspDistanceBadge">585 km</span>
+</div>
+<div class="grid grid-cols-3 gap-2.5 text-center my-3">
+<div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="text-[10px] muted uppercase font-semibold">Road Freight</div>
+<div class="mono text-sm font-bold mt-1" id="inspRoadCost">₹3,080/T</div>
+<div class="text-[10px] muted mt-0.5" id="inspRoadSla">Std SLA</div>
+</div><div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="text-[10px] muted uppercase font-semibold">Rail Freight</div>
+<div class="mono text-sm font-bold mt-1" style="color:var(--green)"
+id="inspRailCost">₹1,369/T</div>
+<div class="text-[10px] muted mt-0.5">Weather-Proof</div>
+</div>
+<div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="text-[10px] muted uppercase font-semibold">Modal Savings</div>
+<div class="mono text-sm font-bold mt-1" style="color:var(--gold)"
+id="inspRailSave">₹1,711/T</div>
+<div class="text-[10px] muted mt-0.5">via Rail Cargo</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-3 border-t text-xs"
+style="border-color:var(--border)">
+<span class="muted">Commodity: <b style="color:var(--text)"
+id="inspMaterialName">Bulk Wheat Flour</b></span>
+<button class="btn btn-primary !py-1.5 !px-3 !text-xs"
+onclick="dispatchFromCorridor()">
+<span data-i="play" data-s="12"></span> Procure on Corridor
+</button>
+</div>
+</div>
+<div class="card p-5">
+<div class="flex justify-between items-center mb-3">
+<h3 class="card-title">All Inbound Freight Corridors (INR / Ton)</h3>
+<span class="badge b-muted mono">Live Multiplier</span>
+</div>
+<div class="overflow-x-auto">
+<table class="t">
+<thead><tr><th>Origin →
+Hub</th><th>Dist</th><th>Road/T</th><th>Rail/T</th><th>Delay</th></tr></thead>
+<tbody id="corridorTableBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== VIEW 4: PIPELINE ===================== --><section id="view-pipeline" class="view">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+<div class="lg:col-span-4 space-y-5">
+<div class="card p-5">
+<h2 class="card-title mb-4 flex items-center gap-2"><span class="w-6 h-6 rounded-md
+flex items-center justify-center text-[11px] font-bold"
+style="background:var(--red);color:#fff">1</span> Dispatch Procurement Request</h2>
+<div class="space-y-3.5">
+<div>
+<label class="lbl">Raw Material Commodity</label>
+<select id="matName" class="field">
+<option value="Bulk Wheat Flour">Bulk Wheat Flour (Catalog Approved)</option>
+<option value="Refined Sugar">Refined Sugar (Catalog Approved)</option>
+<option value="Palm Oil">Palm Oil (Catalog Approved)</option>
+<option value="Cocoa Beans">Cocoa Beans (Catalog Approved)</option>
+<option value="Bulk Corn (Maize)">Bulk Corn (Maize) (Catalog Approved)</option>
+<option value="Corrugated Cartons">Corrugated Cartons (Catalog
+Approved)</option>
+<option value="Industrial Lubricant">🚫 Industrial Lubricant (Unapproved
+Test)</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div><label class="lbl">Required Tonnage</label><input id="tonnage"
+type="number" step="1" value="25" class="field mono" /></div>
+<div><label class="lbl">Stock Urgency (Days)</label><input id="urgency"
+type="number" value="4" class="field mono" /></div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div><label class="lbl">Distance (km)</label><input id="distance" type="number"
+value="100" class="field mono" /></div>
+<div><label class="lbl">Budget Cap (INR)</label><input id="budgetCap"
+type="number" value="4000000" class="field mono" /></div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="lbl">Submitting Agent ID</label>
+<select id="agentId" class="field !text-xs">
+<option value="AGENT_FINANCE_01">AGENT_FINANCE_01
+(Authorized)</option>
+<option value="AGENT_ROGUE_01">🚫 AGENT_ROGUE_01 (Rogue
+Test)</option>
+<option value="AGENT_INVENTORY_01">🚫 AGENT_INVENTORY_01
+(Zero-Budget)</option></select>
+</div>
+<div>
+<label class="lbl">Environment Context</label>
+<select id="simEnv" class="field !text-xs" onchange="syncEnv('form')">
+<option value="Mumbai">Live Mumbai Weather</option>
+<option value="Mumbai_STORM">Severe Monsoon (STORM)</option>
+</select>
+</div>
+</div>
+<button id="runPipelineBtn" onclick="runPipeline(event)" class="btn btn-primary w-full
+!py-3"><span data-i="play" data-s="15"></span><span id="runBtnText">Execute 4-Agent S2P
+Pipeline</span></button>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 space-y-5">
+<div class="card p-5">
+<div class="flex justify-between items-center mb-4"><h2 class="card-title">2. Agent
+Orchestration</h2><span id="pipeStatusBadge" class="badge b-muted">Idle</span></div>
+<div id="stepper">
+<div class="step" data-step="0"><div class="ico" data-i="boxes"></div><div><div
+class="text-sm font-semibold">Demand & Inventory Agent</div><div class="text-xs
+muted">Checks stock, safety levels, urgency</div></div></div>
+<div class="step" data-step="1"><div class="ico" data-i="trend"></div><div><div
+class="text-sm font-semibold">Sourcing & MCDM Agent</div><div class="text-xs
+muted">Ranks vendors · negotiates price</div></div></div>
+<div class="step" data-step="2"><div class="ico" data-i="coins"></div><div><div
+class="text-sm font-semibold">Finance Validator</div><div class="text-xs muted">Recomputes
+math · budget checks</div></div></div>
+<div class="step" data-step="3"><div class="ico" data-i="shield"></div><div><div
+class="text-sm font-semibold">Security Gateway</div><div class="text-xs muted">4-step
+authorization · audit</div></div></div>
+</div>
+<div class="pt-3 border-t space-y-2 text-xs" style="border-color:var(--border)">
+<div class="flex justify-between items-center"><span class="muted">Finance
+Validator Verdict</span><span id="financeVerdict" class="badge
+b-muted">WAITING</span></div>
+<div class="flex justify-between items-center"><span class="muted">Auth Gateway
+Status</span><span id="gatewayVerdict" class="badge b-muted">WAITING</span></div>
+</div>
+</div>
+<div class="card p-5"><h2 class="card-title mb-3">3. Explainability Trace</h2>
+<div id="traceContainer" class="space-y-2.5 text-xs max-h-72 overflow-y-auto pr-1">
+<p class="muted italic">Trigger the pipeline to inspect agent reasoning steps…</p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 space-y-5">
+<div class="card p-5">
+<div class="flex justify-between items-center mb-3">
+<h2 class="card-title">4. MCDM Vendor Ranking</h2>
+<span id="mcdmWeightsBadge" class="badge b-gold mono">Weights --</span>
+</div>
+<div style="height:200px"><canvas id="mcdmChart"></canvas></div>
+<p id="mcdmEmpty" class="text-xs muted text-center mt-3">Run the pipeline to rank
+vendors.</p>
+</div>
+<div class="card p-5 flex flex-col">
+<div class="flex justify-between items-center mb-3">
+<h2 class="card-title">5. Purchase Order & SLA</h2>
+<button onclick="copyPO()" class="btn btn-ghost !py-1.5 !px-2.5 !text-xs"><span
+data-i="copy" data-s="13"></span> Copy</button>
+</div>
+<pre id="poOutput" class="po flex-1 rounded-xl p-4 text-xs mono overflow-x-auto
+whitespace-pre-wrap min-h-[180px]">No Purchase Order generated yet. Run a compliant S2P
+cycle or trigger via Claude Desktop.</pre>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== VIEW 5: LEDGER ===================== -->
+<section id="view-ledger" class="view space-y-5">
+<div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+<div><h2 class="text-lg font-bold">Live PostgreSQL Ledger</h2><p class="text-xs
+muted">Auto-syncs every 5 seconds · changes made via Claude Desktop appear here
+instantly.</p></div>
+<div class="relative w-full sm:w-72"><span class="absolute left-3 top-1/2 -translate-y-1/2
+muted" data-i="search" data-s="15"></span><input id="ledgerFilter" oninput="renderLedger()"
+class="field !pl-9" placeholder="Filter vendor, agent, error…" /></div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+<div class="card p-5"><div class="flex justify-between items-center mb-3"><h3 class="card-title flex
+items-center gap-2"><span class="badge b-green">✓</span> Committed Purchase
+Orders</h3><code class="text-[11px] muted">purchase_orders</code></div>
+<div class="overflow-auto max-h-[420px]"><table
+class="t"><thead><tr><th>PO</th><th>Agent</th><th>Vendor</th><th>Tons</th><th>Unit
+₹</th><th>Landed ₹</th></tr></thead><tbody id="poTableBody"></tbody></table></div>
+</div>
+<div class="card p-5">
+<div class="flex justify-between items-center mb-3"><h3 class="card-title flex
+items-center gap-2"><span class="badge b-red">!</span> Blocked Security
+Violations</h3><code class="text-[11px] muted">audit_log · append-only</code></div>
+<div class="overflow-auto max-h-[420px]"><table
+class="t"><thead><tr><th>ID</th><th>Agent</th><th>Step
+Failed</th><th>Error</th></tr></thead><tbody id="auditTableBody"></tbody></table></div>
+</div>
+</div>
+</section>
+<!-- ===================== VIEW 6: INVENTORY & AUTONOMOUS SELF-HEALING
+===================== -->
+<section id="view-inventory" class="view space-y-5">
+<div class="flex flex-col sm:flex-row gap-3 justify-between sm:items-center">
+<div>
+<h2 class="text-lg font-bold">Live Factory Inventory & Autonomous Self-Healing</h2>
+<p class="text-xs muted">8 enterprise guardrails enabled.</p>
+</div>
+</div>
+<!-- 8-CONTROL AUTONOMOUS SELF-HEALING COMMAND BAR -->
+<div class="card p-5 border-2" id="autoHealCard" style="border-color:color-mix(in
+srgb,var(--gold) 45%,var(--border))">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-xl flex items-center justify-center b-gold"><span
+data-i="shield" data-s="22"></span></div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="card-title">Autonomous Self-Healing Replenishment</h3>
+<span id="ahStateBadge" class="badge b-muted">DISARMED (MANUAL)</span></div>
+<p class="text-xs muted mt-0.5">Auto-replenishes when stock breaches reorder points.</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<select id="ahActionSelect" onchange="runAutoHealAction(this)" class="field !w-auto !py-2 !text-xs min-w-[230px]"
+aria-label="Inventory actions">
+<option value="">Select an action…</option>
+<option value="arm">Arm auto-replenish</option>
+<option value="kill">Kill switch (halt)</option>
+<option value="reset">Reset circuit breaker</option>
+<option value="shift">Run production shift</option>
+</select>
+</div>
+</div>
+<!-- Guardrail Telemetry Strip -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-xs">
+<div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="eyebrow">1. Circuit Breaker</div>
+<div class="mono font-bold text-sm mt-1" id="ahBreakerText"
+style="color:var(--green)">CLOSED (0/2 Errors)</div>
+<div class="text-[11px] muted mt-0.5" id="ahFreqText">0 / 6 Auto-POs used</div>
+</div>
+<div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="eyebrow">2. Rolling Auto-Spend Cap</div>
+<div class="mono font-bold text-sm mt-1" id="ahSpendText">₹0 / ₹60.00 L</div>
+<div class="text-[11px] muted mt-0.5">Single-PO limit ₹25.00 L</div>
+</div>
+<div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="eyebrow">3. Idempotency & Sizing</div>
+<div class="mono font-bold text-sm mt-1">30s cooldown lock</div>
+<div class="text-[11px] muted mt-0.5">1.25× reorder sizing (≥21T)</div>
+</div><div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid
+var(--border)">
+<div class="eyebrow">4. Human Escalation</div>
+<div class="mono font-bold text-sm mt-1" id="ahPendingCount">0 Pending
+Sign-Off</div>
+<div class="text-[11px] muted mt-0.5">Orders &gt; ₹25L need approval</div>
+</div>
+</div>
+<!-- Pending Human-in-the-Loop Escalation Queue -->
+<div id="ahPendingWrap" class="hidden mt-4 pt-3 border-t space-y-2"
+style="border-color:var(--border)">
+<div class="text-xs font-bold uppercase tracking-wider" style="color:var(--gold)">Pending
+manager approval (&gt; ₹25L)</div>
+<div id="ahPendingList" class="space-y-2"></div>
+</div>
+<!-- Autonomous Decision Audit Trail -->
+<div id="ahAuditWrap" class="hidden mt-4 pt-3 border-t"
+style="border-color:var(--border)">
+<div class="text-xs font-bold uppercase tracking-wider muted mb-2">Decision audit trail</div>
+<div id="ahAuditList" class="space-y-1.5 max-h-40 overflow-y-auto text-xs"></div>
+</div>
+</div>
+<div id="inventoryCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4
+stagger"></div>
+<div class="card p-5">
+<h3 class="card-title mb-3">Constraint Table <code class="text-[11px] muted
+ml-1">inventory</code></h3>
+<div class="overflow-auto"><table class="t"><thead><tr><th>Material</th><th>Stock
+(T)</th><th>Safety (T)</th><th>Reorder (T)</th><th>Max SLA Lead</th><th>Max Budget /
+T</th></tr></thead><tbody id="inventoryTableBody"></tbody></table></div>
+</div>
+</section>
+<!-- ===================== VIEW 7: CLEAN CHATGPT-STYLE SIMULATION &
+SINGLE STRESS BUTTON ===================== -->
+<section id="view-simulation" class="view space-y-5">
+<div class="card p-6 space-y-5">
+<!-- Header with Single Compact Stress Test Button -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b"
+style="border-color:var(--border)"><div class="flex items-center gap-3">
+<span class="w-10 h-10 rounded-xl flex items-center justify-center b-gold"><span
+data-i="bot" data-s="20"></span></span>
+<div>
+<h2 class="text-lg font-bold leading-tight">Strategic What-If Copilot & Resilience
+Sandbox</h2>
+<p class="text-xs muted mt-0.5">Ask any supply chain trade-off in natural language or
+voice · <b style="color:var(--green)">Zero PostgreSQL Impact</b></p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span id="simScoreBadge" class="badge b-muted mono hidden"></span>
+<button onclick="runSimulation()" id="simBtn" class="btn btn-ghost !py-2 !px-3.5
+!text-xs">
+<span data-i="shield" data-s="14"></span> <span id="simBtnText">Run 12 Stress
+Tests</span>
+</button>
+</div>
+</div>
+<!-- Collapsible 12-Scenario Table (Hidden until clicked) -->
+<div id="simSuiteDrawer" class="hidden rounded-xl p-4"
+style="background:var(--bg2);border:1px solid var(--border)">
+<div class="flex justify-between items-center mb-2.5">
+<span class="text-xs font-bold uppercase tracking-wider muted">12-Scenario
+Adversarial Regression Matrix</span>
+<button class="text-xs muted hover:underline"
+onclick="$('simSuiteDrawer').classList.add('hidden')">Close ✕</button>
+</div>
+<div class="overflow-auto max-h-72">
+<table class="t">
+<thead><tr><th>Scenario</th><th>Expected Boundary</th><th>Actual
+Outcome</th><th>Status</th></tr></thead>
+<tbody id="simTableBody"></tbody>
+</table>
+</div>
+</div>
+<!-- Compact ChatGPT-Style Single-Line Prompt Pill -->
+<div class="flex items-center gap-2.5 rounded-full px-4 py-2 transition"
+style="background:var(--input);border:1.5px solid color-mix(in srgb,var(--gold)
+45%,var(--border));box-shadow:var(--shadow)">
+<span data-i="sparkles" data-s="18" style="color:var(--gold)"></span>
+<input
+id="nlpInput"
+type="text"
+onkeydown="if(event.key==='Enter')runWhatIf()"
+class="w-full bg-transparent border-0 outline-none text-sm font-medium"
+style="color:var(--text)"
+placeholder="Ask e.g. 'What if wheat prices decrease by 5% and we delay restocking for 6 days?'"
+/>
+<span id="listeningIndicator" class="hidden items-center gap-1.5 px-3 py-1 rounded-full
+text-[11px] font-semibold text-white shrink-0" style="background:var(--red)">
+<span class="voice-wave"><span class="voice-bar"></span><span
+class="voice-bar"></span><span class="voice-bar"></span><span
+class="voice-bar"></span></span>
+Listening…
+</span>
+<button id="nlpMicBtn" onclick="toggleVoice()" class="w-9 h-9 rounded-full flex
+items-center justify-center shrink-0 transition hover:brightness-110"
+style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" title="Voice
+Command">
+<span data-i="mic" data-s="16"></span>
+</button>
+<button id="wiBtn" onclick="runWhatIf()" class="btn btn-primary !rounded-full !py-2 !px-4
+!text-xs shrink-0">
+<span data-i="send" data-s="13"></span> <span>Analyze</span>
+</button>
+</div>
+<!-- Quick Prompt Chips -->
+<div class="flex flex-wrap items-center gap-2 text-xs">
+<span class="text-[11px] font-semibold uppercase tracking-wider
+muted">Presets:</span>
+<button onclick="fillAndRunNLP('What if wheat prices decrease by 5% and we delay restocking
+for 6 days?')" class="badge b-gold hover:brightness-110 cursor-pointer">Wheat -5%
+& Delay 6 Days</button>
+<button onclick="fillAndRunNLP('What if Palm Oil prices surge by 15%, a monsoon storm hits, and we delay 30 tons for 4 days?')" class="badge b-gold hover:brightness-110
+cursor-pointer">Monsoon + 15% Palm Oil Surge</button>
+<button onclick="fillAndRunNLP('What if we route 50 tons of Bulk Corn by rail with a 20
+lakh budget cap?')" class="badge b-gold hover:brightness-110 cursor-pointer">50T Corn via Rail
+(₹20L Cap)</button>
+</div>
+<!-- Claude-Style Comparative Analysis Output --><div id="wiResults" class="rounded-xl p-5" style="background:var(--surface2);border:1px
+dashed var(--border)">
+<div class="text-center py-6 space-y-1.5">
+<div class="w-10 h-10 rounded-full mx-auto flex items-center justify-center
+b-gold"><span data-i="sparkles" data-s="18"></span></div>
+<p class="text-sm font-semibold">Ready for Scenario Analysis</p>
+<p class="text-xs muted max-w-md mx-auto">Type a question above, tap the
+microphone, or select a preset to generate a side-by-side comparative trade-off table.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== VIEW 8: POLICY ===================== -->
+<section id="view-policy" class="view">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+<div class="card p-5 lg:col-span-2">
+<h2 class="text-lg font-bold">Policy Intelligence · ChromaDB RAG</h2>
+<p class="text-xs muted mb-4">Semantic search over
+<code>fmcg_procurement_policy.pdf</code> using the <code>all-MiniLM-L6-v2</code>
+embedding store.</p>
+<div class="flex gap-2 mb-3">
+<input id="policyInput" type="text" onkeydown="if(event.key==='Enter')searchPolicy()"
+placeholder="Ask about volume discount slabs, separation of duties, SLA rules…" class="field"
+/>
+<button onclick="searchPolicy()" class="btn btn-primary shrink-0"><span
+data-i="search" data-s="14"></span> Search</button>
+</div>
+<div class="flex flex-wrap gap-2 mb-4 text-xs">
+<button onclick="quickPolicy('What are the B2B volume discount slabs?')"
+class="badge b-gold hover:brightness-110 cursor-pointer">Volume Discount Slabs</button>
+<button onclick="quickPolicy('What is the Separation of Duties and spending cap for
+Finance Agent?')" class="badge b-gold hover:brightness-110 cursor-pointer">Separation of
+Duties & Caps</button>
+<button onclick="quickPolicy('What are the 4 steps in the Authorization Gateway?')"
+class="badge b-gold hover:brightness-110 cursor-pointer">4-Step Auth Gateway</button>
+</div>
+<div id="policyResult" class="rounded-xl p-4 text-sm whitespace-pre-wrap
+leading-relaxed min-h-[200px]" style="background:var(--input);border:1px solid
+var(--border)">Select a quick topic or enter a query above.</div>
+</div>
+<div class="card p-5">
+<h3 class="card-title mb-3">Governance Guardrails</h3>
+<ul class="space-y-3 text-sm"><li class="flex gap-3"><span class="badge b-green shrink-0
+!h-6">1</span><span>Catalog-only materials are procurable.</span></li>
+<li class="flex gap-3"><span class="badge b-green shrink-0
+!h-6">2</span><span>Agent identity & separation of duties enforced.</span></li>
+<li class="flex gap-3"><span class="badge b-green shrink-0
+!h-6">3</span><span>Finance recomputes all LLM math deterministically.</span></li>
+<li class="flex gap-3"><span class="badge b-green shrink-0
+!h-6">4</span><span>Every violation is appended to the immutable audit log.</span></li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<footer class="px-7 py-4 text-[11px] muted border-t flex flex-wrap justify-between gap-2"
+style="border-color:var(--border)">
+<span>© GoldenCrunch Biscuits · Agentic S2P Orchestration</span>
+<span>LangGraph · Claude MCP · PostgreSQL · ChromaDB</span>
+</footer>
+</div>
+</div>
+<!-- Command palette -->
+<div id="palette" onclick="if(event.target===this)closePalette()">
+<div class="card w-full max-w-lg p-2 mx-4">
+<input id="palInput" class="field !border-0 !shadow-none !text-base" placeholder="Type a
+command or page…" oninput="renderPalette()" onkeydown="palKey(event)" />
+<div id="palList" class="mt-1 max-h-72 overflow-y-auto"></div>
+</div>
+</div>
+<div id="toasts"></div>
+<script>
+var P = {
+menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+refresh:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+workflow:'<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><path d="M9 6h4a2 2 0 0 1 2 2v7"/>',
+db:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+boxes:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+book:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V4.5"/>',
+trend:'<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01"/><circle cx="12" cy="3" r="1"/>',
+map:'<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>',
+mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+sparkles:'<path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3Z"/>',
+play:'<path d="m7 4 13 8-13 8z"/>',
+copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+fuel:'<path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h12M14 10h2a2 2 0 0 1 2 2v4a1.5 1.5 0 0 0 3 0V8l-3-3"/><path d="M7 9h4"/>',
+coins:'<circle cx="8" cy="8" r="5"/><path d="M18.1 10.4A5 5 0 1 1 10.4 18.1"/><path d="M7 6v4"/>',
+alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+check:'<path d="m5 13 4 4L19 7"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+wheat:'<path d="M12 22V9"/><path d="M12 9c0-2-1-3-2-4 0 2 .5 3 2 4zM12 9c0-2 1-3 2-4 0 2-.5 3-2 4zM12 14c0-2-1.5-3-3-3.5 0 2 1 3.2 3 3.5zM12 14c0-2 1.5-3 3-3.5 0 2-1 3.2-3 3.5z"/>',
+wind:'<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7a2 2 0 1 1-2 2"/>',
+arrowUp:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+arrowDown:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
+minus:'<path d="M5 12h14"/>'
+};
+function icon(n, s) {
+var sz = s || 18;
+return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || '') + '</svg>';
+}
+function hydrateIcons(root) {
+var r = root || document;
+var list = r.querySelectorAll('[data-i]');
+for (var i = 0; i < list.length; i++) {
+var el = list[i];
+el.innerHTML = icon(el.dataset.i, Number(el.dataset.s) || 18);
+el.style.display = el.style.display || 'inline-flex';
+el.style.alignItems = 'center';
+el.style.justifyContent = 'center';
+}
+}
+function weatherSVG(kind) {
+var sun = '<g class="spin-slow"><circle cx="32" cy="32" r="11" fill="var(--yellow)"/><g stroke="var(--gold)" stroke-width="3" stroke-linecap="round"><path d="M32 8v6M32 50v6M8 32h6M50 32h6M15 15l4 4M45 45l4 4M15 49l4-4M45 19l4-4"/></g></g>';
+var sunSmall = '<g class="spin-slow"><circle cx="32" cy="32" r="8" fill="var(--yellow)"/><g stroke="var(--gold)" stroke-width="3" stroke-linecap="round"><path d="M32 8v6M32 50v6M8 32h6M50 32h6M15 15l4 4M45 45l4 4M15 49l4-4M45 19l4-4"/></g></g>';
+function cloud(c) { return '<path d="M20 46a10 10 0 1 1 3-19.5A13 13 0 0 1 48 30a8 8 0 0 1-1 16z" fill="' + (c || 'var(--muted)') + '" opacity=".9"/>'; }
+var rain = '<g stroke="#3B82C4" stroke-width="3" stroke-linecap="round"><path class="rain-drop" d="M22 52v4"/><path class="rain-drop" style="animation-delay:.3s" d="M32 52v5"/><path class="rain-drop" style="animation-delay:.6s" d="M42 52v4"/></g>';
+var bolt = '<path class="bolt" d="M34 40 26 54h7l-3 9 11-15h-7l4-8z" fill="var(--yellow)" stroke="var(--gold)" stroke-width="1.5" stroke-linejoin="round"/>';
+var inner = sun;
+if (kind === 'storm') inner = '<g class="float">' + cloud('#5b4a55') + '</g>' + bolt + rain;
+else if (kind === 'rain') inner = '<g class="float">' + cloud('#8a8f9c') + '</g>' + rain;
+else if (kind === 'cloud') inner = '<g transform="translate(-4 -2)">' + sunSmall + '</g><g class="float" transform="translate(4 4)">' + cloud('var(--muted)') + '</g>';
+else if (kind === 'fog') inner = '<g class="float">' + cloud('#aaa') + '</g><g stroke="var(--muted)" stroke-width="3" stroke-linecap="round"><path d="M14 52h36M20 58h28"/></g>';
+return '<svg viewBox="0 0 64 64" width="100%" height="100%">' + inner + '</svg>';
+}
+function weatherKind(cond) {
+var c = String(cond || '').toLowerCase();
+if (/storm|thunder|severe|monsoon/.test(c)) return 'storm';
+if (/rain|drizzle|shower/.test(c)) return 'rain';
+if (/fog|mist|haze|smoke/.test(c)) return 'fog';
+if (/cloud|overcast|clear/.test(c)) return 'cloud';
+return 'sun';
+}
+var API_BASE = (window.location.port === '8000') ? '' : 'http://127.0.0.1:8000';
+var TICKER_MAP = { WHT:'WHEAT', SGR:'SUGAR', PLM:'PALM', COA:'COCOA', CORN:'MAIZE', CRT:'PULP' };
+var CORRIDOR_NODES = [
+{ city: 'Ahmedabad / Kandla → Mumbai', material: 'Palm Oil', distance_km: 610, std_sla: '3–5d' },
+{ city: 'Indore Hub → Mumbai', material: 'Bulk Wheat Flour', distance_km: 585, std_sla: '5–6d' },
+{ city: 'Nagpur Rail Hub → Mumbai', material: 'Bulk Corn (Maize)', distance_km: 790, std_sla: '4–6d' },
+{ city: 'Pune / Baramati → Mumbai', material: 'Refined Sugar', distance_km: 245, std_sla: '6–8d' },
+{ city: 'Ratnagiri / Konkan → Mumbai', material: 'Corrugated Cartons', distance_km: 330, std_sla: '2–4d' },
+{ city: 'Kochi / Malabar → Mumbai', material: 'Cocoa Beans', distance_km: 1150, std_sla: '8–11d' }
+];
+var selectedCorridorIdx = 1;
+var S = {
+tab: 'overview',
+ledger: { purchase_orders: [], audit_log: [], inventory: [], notifications: [] },
+copilot: [],
+telemetry: null,
+seenPO: new Set(),
+seenAudit: new Set(),
+seenNotif: new Set(),
+firstLedger: true,
+online: false,
+lastSync: Date.now(),
+charts: {},
+lastPipeline: null,
+riskItems: []
+};
+var TABS = [
+{ id:'overview', label:'Command Center', icon:'dash', title:'Operations Overview', crumb:'Command Center' },
+{ id:'copilot', label:'AI Copilot', icon:'bot', title:'Proactive AI Copilot Studio', crumb:'Claude MCP Visual Intelligence' },
+{ id:'logistics', label:'Logistics Network', icon:'map', title:'Multi-Modal Logistics & Freight', crumb:'Supply Chain Corridors' },
+{ id:'pipeline', label:'S2P Pipeline', icon:'workflow', title:'S2P Pipeline & MCDM', crumb:'Orchestration' },
+{ id:'ledger', label:'Live Ledger', icon:'db', title:'PostgreSQL Ledger', crumb:'Data & Audit' },
+{ id:'inventory', label:'Inventory', icon:'boxes', title:'Raw Material Inventory', crumb:'Supply & Consumption' },
+{ id:'simulation', label:'Simulation', icon:'shield', title:'What-If Copilot & Stress Suite', crumb:'Resilience' },
+{ id:'policy', label:'Policy RAG', icon:'book', title:'Policy Intelligence', crumb:'Governance' }
+];
+function $(id) { return document.getElementById(id); }
+function inr(n) { return '\u20B9' + Number(n || 0).toLocaleString('en-IN'); }
+function inrC(n) {
+var v = Number(n || 0);
+if (v >= 1e7) return '\u20B9' + (v / 1e7).toFixed(2) + ' Cr';
+if (v >= 1e5) return '\u20B9' + (v / 1e5).toFixed(2) + ' L';
+return inr(v);
+}
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function esc(s) {
+var d = document.createElement('div');
+d.textContent = String(s == null ? '' : s);
+return d.innerHTML;
+}
+function countUp(el, to, fmt, dur) {
+if (!el) return;
+var formatFn = fmt || function(v) { return Math.round(v).toLocaleString('en-IN'); };
+var duration = dur || 900;
+var from = parseFloat(el.dataset.v || 0);
+el.dataset.v = to;
+var t0 = performance.now();
+function frame(t) {
+var p = Math.min(1, (t - t0) / duration);
+var e = 1 - Math.pow(1 - p, 3);
+el.textContent = formatFn(from + (to - from) * e);
+if (p < 1) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+}
+function toast(msg, type, title) {
+var t = document.createElement('div');
+t.className = 'toast ' + (type === 'ok' ? 'ok' : (type === 'err' ? 'err' : ''));
+t.innerHTML = (title ? '<div class="font-semibold mb-0.5">' + esc(title) + '</div>' : '') + '<div class="muted">' + esc(msg) + '</div>';
+$('toasts').appendChild(t);
+setTimeout(function() {
+t.style.transition = 'all .3s';
+t.style.opacity = 0;
+t.style.transform = 'translateX(30px)';
+setTimeout(function() { t.remove(); }, 300);
+}, 4200);
+}
+function renderManagerNotifs() {
+var list = S.ledger.notifications || [];
+if (!list.length) {
+$('notifList').innerHTML = '<div class="p-4 text-center muted italic">No alerts logged in database.</div>';
+$('notifDot').classList.add('hidden');
+return;
+}
+$('notifList').innerHTML = list.map(function(n) {
+var t = String(n.notif_type || '').toUpperCase();
+var bCls = (t==='CRITICAL' || t==='SECURITY') ? 'b-red' : ((t==='WARNING' || t==='PO_COMMITTED') ? 'b-gold' : 'b-green');
+return '<div class="p-2.5 rounded-lg" style="background:var(--bg2)"><div class="flex items-center gap-2 mb-1"><span class="badge ' + bCls + '">' + esc(t) + '</span><span class="muted text-[10px] ml-auto mono">' + esc(n.created_at) + '</span></div><div class="font-semibold">' + esc(n.title) + '</div><div class="mt-1 muted">' + esc(n.message) + '</div></div>';
+}).join('');
+}
+function toggleNotifs() { $('notifPanel').classList.toggle('hidden'); $('notifDot').classList.add('hidden'); }
+async function clearManagerNotifs() {
+try {
+await api('/api/notifications', { method: 'DELETE' });
+S.ledger.notifications = [];
+S.seenNotif.clear();
+renderManagerNotifs();
+toast('Notification history cleared.', 'ok');
+} catch (e) {}
+}
+document.addEventListener('click', function(e) {
+var b = e.target.closest('.btn');
+if (!b) return;
+var r = b.getBoundingClientRect();
+var s = Math.max(r.width, r.height);
+var d = document.createElement('span');
+d.className = 'ripple';
+d.style.cssText = 'width:' + s + 'px;height:' + s + 'px;left:' + (e.clientX - r.left - s / 2) + 'px;top:' + (e.clientY - r.top - s / 2) + 'px';
+b.appendChild(d);
+setTimeout(function() { d.remove(); }, 600);
+});
+async function api(path, opts) {
+var ctl = new AbortController();
+var to = setTimeout(function() { ctl.abort(); }, 60000);
+var options = Object.assign({}, opts || {}, { signal: ctl.signal });
+try {
+var res = await fetch(API_BASE + path, options);
+clearTimeout(to);
+if (!res.ok) throw new Error('HTTP ' + res.status);
+var data = await res.json();
+if (data && data.status === 'ERROR') throw new Error(data.message || 'PostgreSQL Error');
+setOnline(true);
+return data;
+} catch (e) {
+clearTimeout(to);
+setOnline(false);
+throw e;
+}
+}
+function setOnline(online) {
+S.online = online;
+var b = $('dbStatusBadge');
+b.className = 'badge hidden sm:inline-flex ' + (online ? 'b-green' : 'b-red');
+$('dbStatusText').textContent = online ? 'PostgreSQL Live Sync' : 'Backend Offline (Port 8000)';
+$('modeLabel').textContent = online ? 'Live' : 'Offline';
+$('modeSub').textContent = online ? 'API connected' : 'Backend not reachable';
+$('sbAgents').textContent = online ? '4 / 4 online' : '0 / 4 offline';
+$('sbAgents').style.color = online ? '#8BE3B1' : '#EE5246';
+$('sbAgentBar').style.width = online ? '100%' : '0%';
+}
+function buildNav() {
+$('nav').innerHTML = TABS.map(function(t) {
+return '<button class="nav-item ' + (t.id === S.tab ? 'active' : '') + '" data-tab="' + t.id + '" onclick="switchTab(\'' + t.id + '\')"><span data-i="' + t.icon + '"></span>' + t.label + '<span class="pill" id="pill-' + t.id + '" style="display:none"></span></button>';
+}).join('');
+hydrateIcons($('nav'));
+}
+function switchTab(id) {
+S.tab = id;
+var t = TABS.find(function(x) { return x.id === id; });
+document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+$('view-' + id).classList.add('active');
+document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('active', n.dataset.tab === id); });
+if (t) {
+$('pageTitle').textContent = t.title;
+$('crumb').textContent = t.crumb;
+}
+if (window.innerWidth < 1024) toggleSidebar(false);
+window.scrollTo({ top: 0, behavior: 'smooth' });
+setTimeout(function() {
+Object.values(S.charts).forEach(function(c) { if (c && c.resize) c.resize(); });
+if (id === 'copilot') renderCopilotCharts();
+}, 60);
+}
+function toggleSidebar(force) {
+var sb = $('sidebar');
+var open = (force === undefined) ? !sb.classList.contains('open') : force;
+sb.classList.toggle('open', open);
+$('scrim').classList.toggle('hidden', !open);
+}
+function toggleTheme() {
+var cur = document.documentElement.getAttribute('data-theme');
+var next = (cur === 'dark') ? 'light' : 'dark';
+document.documentElement.setAttribute('data-theme', next);
+try { localStorage.setItem('gc-theme', next); } catch(e) {}
+updateThemeIcon();
+renderCharts();
+renderCopilotCharts();
+}
+function updateThemeIcon() {
+var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+$('themeIcon').innerHTML = icon(dark ? 'sun' : 'moon');
+}
+function tick() {
+var n = new Date();
+$('clock').textContent = n.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+$('dateLabel').textContent = n.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+$('syncAge').textContent = S.online ? Math.floor((Date.now() - S.lastSync) / 1000) + 's' : '--';
+}
+function syncEnv(from) {
+var top = $('weatherLocationSelect');
+var form = $('simEnv');
+if (from === 'form') top.value = form.value;
+else if (from === 'top' && (top.value === 'Mumbai' || top.value === 'Mumbai_STORM')) form.value = top.value;
+loadTelemetry();
+loadCopilotInsights();
+}
+/* ============================================================
+DEDICATED LOGISTICS CORRIDOR MAP INTERACTION
+============================================================ */
+function selectCorridorNode(idx) {
+selectedCorridorIdx = idx;
+var node = CORRIDOR_NODES[idx] || CORRIDOR_NODES[0];
+var mult = (S.telemetry && S.telemetry.fuel) ? (S.telemetry.fuel.freight_cost_multiplier || 1.12) : 1.12;
+var wxDelay = (S.telemetry && S.telemetry.weather) ? (S.telemetry.weather.delay_days || 0) : 0;
+var roadCost = Math.round(node.distance_km * 4.50 * mult);
+var railCost = Math.round(node.distance_km * 2.00 * mult);
+var saveCost = roadCost - railCost;
+$('inspCorridorTitle').textContent = node.city;
+$('inspDistanceBadge').textContent = node.distance_km + ' km';
+$('inspRoadCost').textContent = inr(roadCost) + '/T';
+$('inspRoadSla').textContent = wxDelay > 0 ? ('SLA +' + wxDelay + 'd storm delay') : ('SLA ' + node.std_sla);
+$('inspRailCost').textContent = inr(railCost) + '/T';
+$('inspRailSave').textContent = inr(saveCost) + '/T';
+$('inspMaterialName').textContent = node.material;
+}
+function dispatchFromCorridor() {
+var node = CORRIDOR_NODES[selectedCorridorIdx] || CORRIDOR_NODES[0];
+switchTab('pipeline');
+$('matName').value = node.material;
+$('distance').value = node.distance_km;
+toast('Selected ' + node.material + ' (' + node.distance_km + ' km corridor).', 'ok', 'Corridor Loaded');
+}
+/* ============================================================
+AI COPILOT VISUAL STUDIO (DIRECT CLAUDE STREAM)
+============================================================ */
+async function loadCopilotInsights() {
+var loc = $('weatherLocationSelect').value;
+try {
+var data = await api('/api/proactive-insights?location=' + encodeURIComponent(loc));
+S.copilot = data.insights || [];
+var pill = $('pill-copilot');
+if (pill) {
+pill.style.display = S.copilot.length ? 'inline-block' : 'none';
+pill.textContent = S.copilot.length;
+}
+var totalSav = Number(data.total_potential_savings_inr || 0);
+var critCount = S.copilot.filter(function(i) { return String(i.severity).toUpperCase() === 'CRITICAL'; }).length;
+var totalTons = S.copilot.reduce(function(acc, i) { return acc + Number((i.action_payload && i.action_payload.required_tonnage) || 0); }, 0);
+$('copilotSourceBadge').textContent = data.ai_source || 'CLAUDE_MCP';
+$('copKpiSavings').textContent = inr(totalSav);
+$('copKpiCrit').textContent = critCount;
+$('copKpiTons').textContent = totalTons + ' T';
+renderCopilotCharts();
+if (!S.copilot.length) {
+$('copilotGrid').innerHTML = '<div class="col-span-2 card p-6 text-center muted text-sm">No active insights in PostgreSQL. Ask Claude Desktop to publish optimization cards.</div>';
+return;
+}
+$('copilotGrid').innerHTML = S.copilot.map(function(ins, idx) {
+var sev = String(ins.severity || 'HIGH').toUpperCase();
+var bCls = sev === 'CRITICAL' ? 'b-red' : (sev === 'HIGH' ? 'b-gold' : 'b-green');
+var ringCol = sev === 'CRITICAL' ? 'var(--red)' : (sev === 'HIGH' ? 'var(--yellow)' : 'var(--green)');
+var icoName = ins.icon || (sev === 'CRITICAL' ? 'alert' : 'trend');
+var sav = Number(ins.estimated_savings_inr || 0);
+var p = ins.action_payload || {};
+var tons = Number(p.required_tonnage || 25);
+var urg = Number(p.inventory_urgency_days || 3);
+var slabPct = tons > 100 ? 8 : (tons > 50 ? 5 : (tons > 20 ? 2 : 0));
+var coverDays = Number(ins.live_cover_days || 3.0);
+var leadDays = Number(ins.live_fastest_sla_days || 5.0);
+var vendorShort = ins.live_vendor_name || 'Approved Vendor';
+var coverRatio = Math.min(1, coverDays / Math.max(1, leadDays));
+var dashOffset = (97.4 * (1 - coverRatio)).toFixed(1);
+return '<div class="card lift p-5 flex flex-col justify-between gap-4">' +
+'<div class="flex items-start gap-4">' +
+'<div class="relative w-16 h-16 shrink-0">' +
+'<svg viewBox="0 0 36 36" class="w-16 h-16 -rotate-90">' +
+'<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--bg2)" stroke-width="3.5"/>' +
+'<circle cx="18" cy="18" r="15.5" fill="none" stroke="' + ringCol + '" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="' + dashOffset + '"/>' +
+'</svg>' +
+'<div class="absolute inset-0 flex flex-col items-center justify-center leading-none">' +
+'<span class="mono text-xs font-bold">' + coverDays + 'd</span>' +
+'<span class="text-[9px] muted mt-0.5">cover</span>' +
+'</div>' +
+'</div>' +
+'<div class="min-w-0 flex-1">' +
+'<div class="flex items-center justify-between gap-2 mb-1.5">' +
+'<span class="badge ' + bCls + '">' + icon(icoName, 11) + ' ' + esc(sev) + '</span>' +
+'<span class="badge b-green mono">+' + inr(sav) + '</span>' +
+'</div>' +
+'<div class="font-bold text-sm leading-snug">' + esc(ins.title) + '</div>' +
+(ins.message ? '<div class="text-xs muted mt-1 leading-relaxed">' + esc(ins.message) + '</div>' : '') +
+'</div>' +
+'</div>' +
+'<div class="grid grid-cols-4 gap-2 text-center">' +
+'<div class="rounded-lg p-2" style="background:var(--bg2);border:1px solid var(--border)">' +
+'<div class="text-[9px] muted uppercase">Order Qty</div>' +
+'<div class="mono text-xs font-bold mt-0.5">' + tons + ' T</div>' +
+'</div>' +
+'<div class="rounded-lg p-2" style="background:var(--bg2);border:1px solid var(--border)">' +
+'<div class="text-[9px] muted uppercase">Slab Tier</div>' +
+'<div class="mono text-xs font-bold mt-0.5" style="color:var(--green)">-' + slabPct + '%</div>' +
+'</div>' +
+'<div class="rounded-lg p-2" style="background:var(--bg2);border:1px solid var(--border)">' +
+'<div class="text-[9px] muted uppercase">Vendor SLA</div>' +
+'<div class="mono text-xs font-bold mt-0.5" style="color:var(--gold)">' + leadDays + 'd</div>' +
+'</div>' +
+'<div class="rounded-lg p-2" style="background:var(--bg2);border:1px solid var(--border)">' +
+'<div class="text-[9px] muted uppercase">Urgency</div>' +
+'<div class="mono text-xs font-bold mt-0.5">' + urg + 'd</div>' +
+'</div>' +
+'</div>' +
+'<div class="flex items-center justify-between pt-2.5 border-t" style="border-color:var(--border)">' +
+'<span class="text-[11px] mono muted">' + esc(vendorShort) + '</span>' +
+'<button type="button" class="btn btn-primary !py-2 !px-4 !text-xs" onclick="applyCopilotInsight(' + idx + ')">' +
+icon('play', 12) + ' <span>' + esc(ins.action_label || '1-Click Dispatch') + '</span>' +
+'</button>' +
+'</div>' +
+'</div>';
+}).join('');
+} catch (err) {
+$('copilotGrid').innerHTML = '<div class="col-span-2 text-xs" style="color:var(--red)">❌ FastAPI or PostgreSQL is offline (' + esc(err.message) + ').</div>';
+}
+}
+/* Risk breakdown doughnut (replaces the radar) */
+function setRiskCenter(i) {
+var items = S.riskItems || [];
+if (!items.length) return;
+if (i < 0 || !items[i]) {
+var avg = items.reduce(function(a, b) { return a + b.value; }, 0) / items.length;
+$('riskCenterVal').textContent = Math.round(avg) + '%';
+$('riskCenterVal').style.color = 'var(--text)';
+$('riskCenterLbl').textContent = 'Avg risk';
+} else {
+$('riskCenterVal').textContent = Math.round(items[i].value) + '%';
+$('riskCenterVal').style.color = items[i].color;
+$('riskCenterLbl').textContent = items[i].label;
+}
+}
+function hoverRisk(i) {
+var ch = S.charts.copRisk;
+if (ch) {
+ch.setActiveElements(i >= 0 ? [{ datasetIndex: 0, index: i }] : []);
+ch.update('none');
+}
+setRiskCenter(i);
+}
+function toggleRisk(i) {
+var ch = S.charts.copRisk;
+if (!ch) return;
+ch.toggleDataVisibility(i);
+ch.update();
+var row = document.querySelector('#riskLegend [data-ri="' + i + '"]');
+if (row) row.classList.toggle('opacity-40');
+}
+function renderRiskLegend() {
+var items = S.riskItems || [];
+$('riskLegend').innerHTML = items.map(function(it, i) {
+return '<button type="button" data-ri="' + i + '" onmouseenter="hoverRisk(' + i + ')" onmouseleave="hoverRisk(-1)" onclick="toggleRisk(' + i + ')" class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:brightness-110" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)">' +
+'<span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:' + it.color + '"></span>' +
+'<span class="flex-1 truncate">' + esc(it.label) + '</span>' +
+'<span class="mono font-semibold">' + Math.round(it.value) + '%</span>' +
+'</button>';
+}).join('');
+}
+function renderCopilotCharts() {
+if (!window.Chart) return;
+chartDefaults();
+var grid = css('--grid'), tick = css('--tick'), red = css('--red'), gold = css('--gold'), yellow = css('--yellow'), green = css('--green');
+if (S.charts.copSavings) S.charts.copSavings.destroy();
+if ($('copilotSavingsChart') && S.copilot.length) {
+var labels = S.copilot.map(function(c) { return (c.action_payload && c.action_payload.material_name) ? c.action_payload.material_name.replace('Bulk ', '') : c.category; });
+var savData = S.copilot.map(function(c) { return Number(c.estimated_savings_inr || 0); });
+S.charts.copSavings = new Chart($('copilotSavingsChart'), {
+type: 'bar',
+data: { labels: labels, datasets: [{ label: 'Savings (INR)', data: savData, backgroundColor: [red, yellow, gold, green], borderRadius: 8, barPercentage: 0.6 }] },
+options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick } }, y: { grid: { display: false }, ticks: { color: tick } } } }
+});
+}
+if (S.charts.copCover) S.charts.copCover.destroy();
+if ($('copilotCoverChart')) {
+var cLabels = S.copilot.length ? S.copilot.map(function(c) { return (c.action_payload && c.action_payload.material_name) ? c.action_payload.material_name.replace('Bulk ', '') : 'Item'; }) : ['Palm Oil', 'Wheat Flour', 'Cocoa Beans', 'Corn'];
+var cCover = S.copilot.length ? S.copilot.map(function(c) { return c.live_cover_days || 3; }) : [2.7, 3.0, 3.3, 6.2];
+var cSla = S.copilot.length ? S.copilot.map(function(c) { return c.live_fastest_sla_days || 5; }) : [3.0, 5.0, 8.0, 6.0];
+S.charts.copCover = new Chart($('copilotCoverChart'), {
+type: 'bar',
+data: {
+labels: cLabels,
+datasets: [
+{ label: 'Stock Cover (Days)', data: cCover, backgroundColor: red, borderRadius: 6, barPercentage: 0.65 },
+{ label: 'Fastest Vendor SLA (Days)', data: cSla, backgroundColor: gold, borderRadius: 6, barPercentage: 0.65 }
+]
+},
+options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: tick } } }, scales: { y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick } }, x: { grid: { display: false }, ticks: { color: tick } } } }
+});
+}
+if (S.charts.copRisk) S.charts.copRisk.destroy();
+if ($('copilotRiskDoughnut')) {
+var wxRisk = S.telemetry ? Math.round((S.telemetry.weather.delivery_risk_score || 0.2) * 100) : 25;
+var fuelPress = S.telemetry ? Math.min(100, Math.round(((S.telemetry.fuel.freight_cost_multiplier || 1.1) - 0.8) * 180)) : 78;
+S.riskItems = [
+{ label: 'Stockout Hazard', value: 88, color: red },
+{ label: 'SLA Gap', value: 82, color: '#D9641E' },
+{ label: 'Fuel Multiplier', value: fuelPress, color: gold },
+{ label: 'Price Surge', value: 74, color: '#7A9E3B' },
+{ label: 'Weather Risk', value: wxRisk, color: '#3B82C4' }
+];
+var rTot = S.riskItems.reduce(function(a, b) { return a + b.value; }, 0) || 1;
+S.charts.copRisk = new Chart($('copilotRiskDoughnut'), {
+type: 'doughnut',
+data: {
+labels: S.riskItems.map(function(x) { return x.label; }),
+datasets: [{
+data: S.riskItems.map(function(x) { return x.value; }),
+backgroundColor: S.riskItems.map(function(x) { return x.color; }),
+borderColor: css('--surface'),
+borderWidth: 3,
+hoverOffset: 10
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+cutout: '66%',
+animation: { duration: 700 },
+plugins: {
+legend: { display: false },
+tooltip: {
+callbacks: {
+label: function(c) { return ' ' + c.label + ': ' + Math.round(c.parsed / rTot * 100) + '% of total risk'; }
+}
+}
+},
+onHover: function(evt, els) {
+var idx = els.length ? els[0].index : -1;
+setRiskCenter(idx);
+}
+}
+});
+renderRiskLegend();
+setRiskCenter(-1);
+}
+}
+function applyCopilotInsight(idx) {
+var ins = S.copilot[idx];
+if (!ins || !ins.action_payload) return;
+var p = ins.action_payload;
+switchTab('pipeline');
+if (p.material_name) $('matName').value = p.material_name;
+if (p.required_tonnage) $('tonnage').value = p.required_tonnage;
+if (p.inventory_urgency_days) $('urgency').value = p.inventory_urgency_days;
+if (p.transport_distance_km) $('distance').value = p.transport_distance_km;
+if (p.budget_cap) $('budgetCap').value = p.budget_cap;
+if (p.agent_id) $('agentId').value = p.agent_id;
+if (p.simulated_environment && ($('simEnv').querySelector('option[value="' + p.simulated_environment + '"]'))) {
+$('simEnv').value = p.simulated_environment;
+}
+toast('Applied Claude MCP parameters (' + p.required_tonnage + 'T ' + p.material_name + '). Launching S2P Pipeline…', 'ok', '1-Click Copilot Dispatch');
+setTimeout(function() { runPipeline(); }, 250);
+}
+async function loadTelemetry() {
+var loc = $('weatherLocationSelect').value;
+try {
+var data = await api('/api/telemetry?location=' + encodeURIComponent(loc));
+S.telemetry = data;
+var w = data.weather || {};
+var f = data.fuel || {};
+var isStorm = weatherKind(w.condition) === 'storm';
+$('weatherIcon').innerHTML = weatherSVG(weatherKind(w.condition));
+$('weatherCondition').textContent = (w.condition || '--') + ' · ' + (w.location || loc.replace('_STORM', ''));
+$('weatherTemp').textContent = (w.temperature_c !== undefined) ? Math.round(w.temperature_c) + '°C' : '30°C';
+$('weatherMeta').textContent = (w.temperature_c !== undefined) ? ('Wind ' + w.wind_speed_kmh + ' km/h · Delay +' + w.delay_days + 'd') : ('Projected delay +' + w.delay_days + ' days');
+var risk = w.delivery_risk_score || 0;
+var pct = Math.round(risk * 100);
+var col = risk > 0.6 ? 'var(--red)' : (risk > 0.35 ? 'var(--yellow)' : 'var(--green)');
+var rb = $('weatherRiskBadge');
+rb.textContent = 'Risk ' + pct + '%';
+rb.className = 'badge ' + (risk > 0.6 ? 'b-red' : (risk > 0.35 ? 'b-gold' : 'b-green'));
+$('weatherRiskPct').textContent = pct + '%';
+var bar = $('weatherRiskBar');
+bar.style.width = pct + '%';
+bar.style.background = col;
+$('weatherSource').lastElementChild.textContent = w.source || 'LIVE · Open-Meteo';
+$('fuelPrice').textContent = '\u20B9' + f.fuel_price_per_liter_inr;
+$('fuelMultiplierBadge').textContent = f.freight_cost_multiplier + '× multiplier';
+var m = f.freight_cost_multiplier || 1;
+$('frRoad').textContent = '\u20B9' + (4.5 * m).toFixed(2);
+$('frRail').textContent = '\u20B9' + (2.0 * m).toFixed(2);
+$('frExp').textContent = '\u20B9' + (5.2 * m).toFixed(2);
+$('fuelSource').lastElementChild.textContent = f.source || 'LIVE · Brent';
+// Update Dedicated Logistics Screen KPIs, Map Routes & Table
+$('logFuelKpi').textContent = '\u20B9' + f.fuel_price_per_liter_inr + '/L';
+$('logMultKpi').textContent = f.freight_cost_multiplier + '× Freight Multiplier';
+$('logCorridorState').textContent = isStorm ? 'Monsoon Disruption' : 'All Clear';
+$('logCorridorState').style.color = isStorm ? 'var(--red)' : 'var(--green)';
+$('logDelaySub').textContent = '+' + (w.delay_days || 0) + 'd road transit delay';
+$('corridorStatusBadge').className = 'badge ' + (isStorm ? 'b-red' : 'b-green');
+$('corridorStatusBadge').textContent = isStorm ? 'Storm Alert · Shift Road to Rail' : 'All Routes Optimal';
+['route-ahmedabad', 'route-indore', 'route-pune', 'route-kochi'].forEach(function(id) {
+var el = $(id);
+if (el) el.setAttribute('stroke', isStorm ? 'var(--red)' : 'var(--gold)');
+});
+$('corridorTableBody').innerHTML = CORRIDOR_NODES.map(function(node, idx) {
+var rCost = Math.round(node.distance_km * 4.50 * m);
+var rlCost = Math.round(node.distance_km * 2.00 * m);
+return '<tr class="cursor-pointer" onclick="selectCorridorNode(' + idx + ')">' +
+'<td><div class="font-semibold text-xs">' + esc(node.city) + '</div><div class="text-[10px] muted">' + esc(node.material) + '</div></td>' +
+'<td class="mono text-xs">' + node.distance_km + ' km</td>' +
+'<td class="mono text-xs">' + inr(rCost) + '</td>' +
+'<td class="mono text-xs font-bold" style="color:var(--green)">' + inr(rlCost) + '</td>' +
+'<td><span class="badge ' + (isStorm ? 'b-red' : 'b-green') + '">+' + (w.delay_days || 0) + 'd</span></td></tr>';
+}).join('');
+selectCorridorNode(selectedCorridorIdx);
+var comms = (data.commodities || []).map(function(c) {
+return { ticker: TICKER_MAP[c.ticker] || c.ticker, trend: c.trend === 'STABLE' ? 'FLAT' : c.trend, spot_price_inr: c.spot_price_inr };
+});
+function arrow(t) { return t === 'UP' ? 'arrowUp' : (t === 'DOWN' ? 'arrowDown' : 'minus'); }
+function clr(t) { return t === 'UP' ? 'var(--red)' : (t === 'DOWN' ? 'var(--green)' : 'var(--muted)'); }
+$('commodityGrid').innerHTML = comms.map(function(c) {
+return '<div class="rounded-xl p-2.5 transition hover:-translate-y-0.5" style="background:var(--bg2);border:1px solid var(--border)"><div class="flex justify-between items-center font-semibold"><span>' + esc(c.ticker) + '</span><span class="flex items-center gap-0.5" style="color:' + clr(c.trend) + '">' + icon(arrow(c.trend), 12) + '<span class="text-[10px]">' + esc(c.trend) + '</span></span></div><div class="mono mt-1 text-[13px]">' + inr(c.spot_price_inr) + '</div></div>';
+}).join('');
+var items = comms.map(function(c) {
+return '<span class="flex items-center gap-1.5"><b>' + esc(c.ticker) + '</b> ' + inr(c.spot_price_inr) + ' <span style="color:' + clr(c.trend) + '">' + icon(arrow(c.trend), 11) + '</span></span>';
+}).join('');
+var fuelItem = '<span class="flex items-center gap-1.5"><b>DIESEL</b> \u20B9' + f.fuel_price_per_liter_inr + '/L</span><span class="flex items-center gap-1.5"><b>WX</b> ' + esc(w.condition || '') + ' ' + (w.temperature_c !== undefined ? Math.round(w.temperature_c) + '°C' : '') + '</span>';
+$('tickerTrack').innerHTML = (items + fuelItem).repeat(4);
+} catch (err) {
+$('weatherIcon').innerHTML = weatherSVG('cloud');
+$('weatherCondition').textContent = 'Backend Offline';
+$('weatherMeta').textContent = 'Start uvicorn main:app on port 8000';
+}
+}
+async function loadLedger() {
+try {
+var data = await api('/api/ledger');
+S.ledger = {
+purchase_orders: data.purchase_orders || [],
+audit_log: data.audit_log || [],
+inventory: data.inventory || [],
+notifications: data.notifications || []
+};
+S.lastSync = Date.now();
+var newPO = [], newAudit = [], newNotifs = [];
+S.ledger.purchase_orders.forEach(function(p) {
+if (!S.seenPO.has(p.po_id)) { if (!S.firstLedger) newPO.push(p); S.seenPO.add(p.po_id); }
+});
+S.ledger.audit_log.forEach(function(a) {
+if (!S.seenAudit.has(a.event_id)) { if (!S.firstLedger) newAudit.push(a); S.seenAudit.add(a.event_id); }
+});
+S.ledger.notifications.forEach(function(n) {
+if (!S.seenNotif.has(n.notif_id)) { if (!S.firstLedger) newNotifs.push(n); S.seenNotif.add(n.notif_id); }
+});
+newPO.forEach(function(p) { toast(p.vendor_name + ' · ' + p.total_tonnage + 'T · ' + inr(p.total_landed_cost), 'ok', 'PO #' + p.po_id + ' committed'); });
+newAudit.forEach(function(a) { toast(a.error_message, 'err', 'Blocked: ' + a.agent_id); });
+newNotifs.forEach(function(n) {
+if (String(n.notif_type).toUpperCase() === 'CRITICAL' || String(n.notif_type).toUpperCase() === 'SECURITY') {
+$('notifDot').classList.remove('hidden');
+toast(n.message, 'err', n.title);
+} else if (String(n.notif_type).toUpperCase() === 'WARNING') {
+$('notifDot').classList.remove('hidden');
+toast(n.message, '', n.title);
+}
+});
+S.flash = { po: new Set(newPO.map(function(p) { return p.po_id; })), audit: new Set(newAudit.map(function(a) { return a.event_id; })) };
+S.firstLedger = false;
+renderLedger();
+renderInventory();
+renderKPIs();
+renderCharts();
+renderActivity();
+renderAgents();
+renderManagerNotifs();
+if (data.auto_heal) renderAutoHeal(data.auto_heal);
+var pp = $('pill-ledger');
+pp.style.display = 'inline-block';
+pp.textContent = S.ledger.purchase_orders.length;
+var pa = $('pill-inventory');
+var low = S.ledger.inventory.filter(function(i) { return Number(i.current_stock_tons) <= Number(i.reorder_point_tons); }).length;
+pa.style.display = low ? 'inline-block' : 'none';
+pa.textContent = low + ' low';
+} catch (err) {}
+}
+function renderLedger() {
+var q = ($('ledgerFilter').value || '').toLowerCase();
+var fl = S.flash || { po: new Set(), audit: new Set() };
+var pos = S.ledger.purchase_orders.filter(function(p) { return !q || JSON.stringify(p).toLowerCase().includes(q); });
+$('poTableBody').innerHTML = pos.map(function(po) {
+return '<tr class="' + (fl.po.has(po.po_id) ? 'flash' : '') + '"><td class="mono font-semibold" style="color:var(--gold)">#' + po.po_id + '</td><td class="text-xs">' + esc(po.agent_id) + '</td><td class="font-semibold">' + esc(po.vendor_name) + '</td><td class="mono">' + po.total_tonnage + ' T</td><td class="mono">' + inr(po.negotiated_unit_price) + '</td><td class="mono font-bold" style="color:var(--green)">' + inr(po.total_landed_cost) + '</td></tr>';
+}).join('') || '<tr><td colspan="6" class="muted py-4">No purchase orders recorded yet.</td></tr>';
+var au = S.ledger.audit_log.filter(function(a) { return !q || JSON.stringify(a).toLowerCase().includes(q); });
+$('auditTableBody').innerHTML = au.map(function(a) {
+return '<tr class="' + (fl.audit.has(a.event_id) ? 'flash' : '') + '"><td class="mono font-semibold" style="color:var(--red)">#' + a.event_id + '</td><td class="font-semibold text-xs">' + esc(a.agent_id) + '</td><td><span class="badge b-red">' + esc(a.step_failed) + '</span></td><td class="text-xs" style="color:var(--red)">' + esc(a.error_message) + '</td></tr>';
+}).join('') || '<tr><td colspan="4" class="muted py-4">Zero security breaches logged.</td></tr>';
+}
+function stockStatus(i) {
+var s = Number(i.current_stock_tons);
+if (s <= Number(i.safety_stock_tons)) return { k: 'CRITICAL', c: 'var(--red)', b: 'b-red' };
+if (s <= Number(i.reorder_point_tons)) return { k: 'REORDER', c: 'var(--yellow)', b: 'b-gold' };
+return { k: 'HEALTHY', c: 'var(--green)', b: 'b-green' };
+}
+function renderInventory() {
+var inv = S.ledger.inventory;
+$('inventoryCards').innerHTML = inv.map(function(i) {
+var st = stockStatus(i);
+var max = Math.max(i.reorder_point_tons * 1.6, i.current_stock_tons * 1.1);
+var pct = Math.min(100, (i.current_stock_tons / max) * 100);
+var rp = (i.reorder_point_tons / max) * 100;
+var sp = (i.safety_stock_tons / max) * 100;
+return '<div class="card lift p-5 flex flex-col justify-between"><div class="flex justify-between items-start"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--gold-soft);color:var(--gold)">' + icon('wheat', 20) + '</div><div><div class="font-semibold text-sm">' + esc(i.material_name) + '</div><div class="text-[11px] muted">Max SLA ' + i.max_lead_time_days + 'd · ' + inr(i.max_budget_per_ton) + '/T</div></div></div><span class="badge ' + st.b + '">' + st.k + '</span></div>' +
+'<div class="mt-4 flex items-end justify-between"><div class="display text-2xl font-bold">' + i.current_stock_tons + '<span class="text-sm muted font-medium"> T</span></div><div class="text-[11px] muted text-right">Safety ' + i.safety_stock_tons + 'T · Reorder ' + i.reorder_point_tons + 'T</div></div>' +
+'<div class="bar mt-2 !h-2.5 overflow-visible"><span style="width:' + pct + '%;background:' + st.c + '"></span><i style="position:absolute;left:' + sp + '%;top:-3px;bottom:-3px;width:2px;background:var(--red)"></i><i style="position:absolute;left:' + rp + '%;top:-3px;bottom:-3px;width:2px;background:var(--gold)"></i></div>' +
+'<div class="flex gap-3 mt-2 text-[10px] muted"><span><i style="display:inline-block;width:8px;height:2px;background:var(--red);vertical-align:middle"></i> Safety</span><span><i style="display:inline-block;width:8px;height:2px;background:var(--gold);vertical-align:middle"></i> Reorder</span></div>' +
+'<div class="flex items-center gap-2 mt-4 pt-3 border-t" style="border-color:var(--border)">' +
+'<span class="text-[10px] muted font-semibold uppercase flex-1">Factory Burn</span>' +
+'<button class="btn btn-ghost !py-1 !px-2.5 !text-[11px]" onclick="consumeStock(\'' + encodeURIComponent(i.material_name) + '\', 5)">-5T</button>' +
+'<button class="btn btn-ghost !py-1 !px-2.5 !text-[11px]" onclick="consumeStock(\'' + encodeURIComponent(i.material_name) + '\', 10)">-10T</button>' +
+'</div></div>';
+}).join('');
+$('inventoryTableBody').innerHTML = inv.map(function(i) {
+return '<tr><td class="font-semibold">' + esc(i.material_name) + '</td><td class="mono">' + i.current_stock_tons + ' T</td><td class="mono">' + i.safety_stock_tons + ' T</td><td class="mono">' + i.reorder_point_tons + ' T</td><td class="mono">' + i.max_lead_time_days + ' days</td><td class="mono">' + inr(i.max_budget_per_ton) + '</td></tr>';
+}).join('');
+}
+function renderAutoHeal(ah) {
+if (!ah || !$('ahStateBadge')) return;
+var armed = ah.enabled && !ah.circuit_breaker_tripped;
+var badge = $('ahStateBadge');
+if (ah.circuit_breaker_tripped) {
+badge.className = 'badge b-red';
+badge.textContent = 'CIRCUIT BREAKER TRIPPED';
+} else if (armed) {
+badge.className = 'badge b-green';
+badge.innerHTML = '<span class="dot pulse"></span> ARMED (8 GUARDRAILS ACTIVE)';
+} else {
+badge.className = 'badge b-muted';
+badge.textContent = 'DISARMED (MANUAL MODE)';
+}
+$('ahBreakerText').textContent = ah.circuit_breaker_tripped ? ('TRIPPED: ' + (ah.circuit_breaker_reason || 'Halted')) : ('CLOSED (' + ah.consecutive_failures + '/' + ah.max_consecutive_failures + ' Errors)');
+$('ahBreakerText').style.color = ah.circuit_breaker_tripped ? 'var(--red)' : 'var(--green)';
+$('ahFreqText').textContent = ah.auto_orders_executed + ' / ' + ah.max_auto_orders_per_window + ' Auto-POs used';
+$('ahSpendText').textContent = inrC(ah.cumulative_auto_spend_inr) + ' / ' + inrC(ah.max_cumulative_auto_spend_inr);
+var pend = ah.pending_human_approvals || [];
+$('ahPendingCount').textContent = pend.length + ' Pending Sign-Off';
+$('ahPendingCount').style.color = pend.length ? 'var(--gold)' : 'var(--text)';
+if (pend.length) {
+$('ahPendingWrap').classList.remove('hidden');
+$('ahPendingList').innerHTML = pend.map(function(p) {
+return '<div class="p-3 rounded-xl flex flex-wrap items-center justify-between gap-3" style="background:var(--bg2);border:1px solid var(--gold)">' +
+'<div><div class="font-bold text-xs">' + esc(p.material_name) + ' · ' + p.tonnage + 'T from ' + esc(p.vendor_name) + ' (' + inr(p.total_landed_cost) + ')</div>' +
+'<div class="text-[11px] muted">' + esc(p.reason) + ' · ID: <code>' + esc(p.approval_id) + '</code></div></div>' +
+'<div class="flex gap-2">' +
+'<button class="btn btn-green !py-1 !px-3 !text-xs" onclick="approveEscalated(\'' + p.approval_id + '\')">Approve & Commit</button>' +
+'<button class="btn btn-ghost !py-1 !px-3 !text-xs" onclick="rejectEscalated(\'' + p.approval_id + '\')">Reject</button>' +
+'</div></div>';
+}).join('');
+} else {
+$('ahPendingWrap').classList.add('hidden');
+}
+var trail = ah.audit_trail || [];
+if (trail.length) {
+$('ahAuditWrap').classList.remove('hidden');
+$('ahAuditList').innerHTML = trail.map(function(t) {
+var c = t.status.includes('COMMITTED') ? 'b-green' : (t.status.includes('ESCALATED') ? 'b-gold' : 'b-red');
+return '<div class="p-2 rounded-lg flex flex-wrap items-center justify-between gap-2" style="background:var(--bg2)">' +
+'<div class="flex items-center gap-2"><span class="badge ' + c + '">' + esc(t.status) + '</span><span class="font-semibold">' + esc(t.material) + ' (' + t.tons + 'T)</span><span class="muted">' + esc(t.reason) + '</span></div>' +
+'<span class="mono text-[10px] muted">' + esc(t.idempotency_key) + ' · ' + esc(t.timestamp) + '</span></div>';
+}).join('');
+} else {
+$('ahAuditWrap').classList.add('hidden');
+}
+}
+/* Single dropdown controller for the self-healing actions */
+function runAutoHealAction(sel) {
+var v = sel.value;
+sel.value = '';
+if (v === 'arm') toggleAutoHeal(true);
+else if (v === 'kill') toggleAutoHeal(false);
+else if (v === 'reset') resetCircuitBreaker();
+else if (v === 'shift') runBiscuitShift();
+}
+async function toggleAutoHeal(enable) {
+try {
+var data = await api('/api/auto-heal/toggle', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ enabled: enable, reset_circuit_breaker: false })
+});
+renderAutoHeal(data);
+toast(enable ? 'Autonomous Self-Healing ARMED with 8 guardrails.' : 'Kill Switch engaged. Autonomous ordering halted.', enable ? 'ok' : 'err', enable ? 'Auto-Heal Armed' : 'Kill Switch Engaged');
+} catch (e) {}
+}
+async function resetCircuitBreaker() {
+try {
+var data = await api('/api/auto-heal/toggle', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ enabled: true, reset_circuit_breaker: true })
+});
+renderAutoHeal(data);
+toast('Circuit breaker, spend counters, and idempotency cooldowns reset.', 'ok', 'Breaker Reset');
+} catch (e) {}
+}
+async function approveEscalated(id) {
+var res = await api('/api/auto-heal/approve/' + encodeURIComponent(id), { method: 'POST' });
+toast('Escalated PO #' + res.po_id + ' approved and committed to PostgreSQL.', 'ok', 'Human-in-the-Loop Approved');
+loadLedger();
+}
+async function rejectEscalated(id) {
+await api('/api/auto-heal/reject/' + encodeURIComponent(id), { method: 'POST' });
+toast('Escalated requisition rejected.', 'err', 'Requisition Rejected');
+loadLedger();
+}
+async function consumeStock(matEncoded, tons) {
+var mat = decodeURIComponent(matEncoded);
+try {
+var data = await api('/api/inventory/consume', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'SINGLE', material_name: mat, tons_used: tons }) });
+toast('Burned ' + tons + 'T of ' + mat + '.', 'info');
+(data.auto_heal_actions || []).forEach(function(a) {
+if (a.outcome === 'AUTO_REPLENISHED') toast('Auto-ordered +' + a.tons_ordered + 'T ' + a.material + ' from ' + a.vendor + ' (' + inr(a.landed_cost) + ')', 'ok', '⚡ Self-Healing PO #' + a.po_id);
+else if (a.outcome === 'ESCALATED_TO_HUMAN') toast(a.detail, 'err', '⏸️ Escalated for Manager Sign-Off');
+else toast(a.detail, 'info', a.outcome);
+});
+if (data.auto_heal_status) renderAutoHeal(data.auto_heal_status);
+loadLedger();
+} catch (e) { toast('Error consuming stock.', 'err'); }
+}
+async function runBiscuitShift() {
+try {
+toast('Burning standard shift Bill of Materials...', 'info');
+var data = await api('/api/inventory/consume', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'PRODUCTION_SHIFT', shifts: 1.0 }) });
+toast('Shift completed! ' + (data.threshold_breaches > 0 ? (data.threshold_breaches + ' thresholds crossed!') : 'All stocks healthy.'), data.threshold_breaches > 0 ? 'err' : 'ok');
+(data.auto_heal_actions || []).forEach(function(a) {
+if (a.outcome === 'AUTO_REPLENISHED') toast('Auto-ordered +' + a.tons_ordered + 'T ' + a.material + ' from ' + a.vendor + ' (' + inr(a.landed_cost) + ')', 'ok', '⚡ Self-Healing PO #' + a.po_id);
+else if (a.outcome === 'ESCALATED_TO_HUMAN') toast(a.detail, 'err', '⏸️ Escalated for Manager Sign-Off');
+else toast(a.detail, 'info', a.outcome);
+});
+if (data.auto_heal_status) renderAutoHeal(data.auto_heal_status);
+loadLedger();
+} catch (e) { toast('Error running shift.', 'err'); }
+}
+function renderKPIs() {
+var pos = S.ledger.purchase_orders;
+var au = S.ledger.audit_log;
+var inv = S.ledger.inventory;
+var spend = pos.reduce(function(a, p) { return a + Number(p.total_landed_cost || 0); }, 0);
+var tons = pos.reduce(function(a, p) { return a + Number(p.total_tonnage || 0); }, 0);
+var low = inv.filter(function(i) { return Number(i.current_stock_tons) <= Number(i.reorder_point_tons); }).length;
+var K = [
+{ k: 'po', label: 'Committed POs', val: pos.length, fmt: function(v) { return Math.round(v); }, icon: 'check', cls: 'green', sub: tons + ' T procured' },
+{ k: 'spend', label: 'Committed Spend', val: spend, fmt: function(v) { return inrC(v); }, icon: 'coins', cls: 'gold', sub: 'Total landed cost' },
+{ k: 'au', label: 'Threats Blocked', val: au.length, fmt: function(v) { return Math.round(v); }, icon: 'shield', cls: 'red', sub: 'Audit-logged violations' },
+{ k: 'low', label: 'Items to Reorder', val: low, fmt: function(v) { return Math.round(v); }, icon: 'alert', cls: 'gold', sub: 'of ' + inv.length + ' materials' }
+];
+if (!$('kpiGrid').children.length) {
+$('kpiGrid').innerHTML = K.map(function(k) {
+return '<div class="card lift p-5"><div class="flex justify-between items-start"><div class="eyebrow">' + k.label + '</div><span class="w-9 h-9 rounded-xl flex items-center justify-center b-' + k.cls + '">' + icon(k.icon, 18) + '</span></div><div class="display text-2xl md:text-3xl font-bold mt-3" id="kpi-' + k.k + '">0</div><div class="text-xs muted mt-1" id="kpis-' + k.k + '"></div></div>';
+}).join('');
+}
+K.forEach(function(k) {
+countUp($('kpi-' + k.k), k.val, k.fmt);
+$('kpis-' + k.k).textContent = k.sub;
+});
+}
+function renderActivity() {
+var ev = S.ledger.purchase_orders.map(function(p) {
+return { t: 'po', id: p.po_id, msg: 'PO #' + p.po_id + ' · ' + p.vendor_name, sub: p.total_tonnage + 'T · ' + inrC(p.total_landed_cost) };
+}).concat(S.ledger.audit_log.map(function(a) {
+return { t: 'au', id: a.event_id, msg: a.agent_id + ' blocked', sub: a.step_failed + ': ' + a.error_message };
+})).sort(function(a, b) { return b.id - a.id; }).slice(0, 8);
+$('activityFeed').innerHTML = ev.map(function(e) {
+return '<div class="flex gap-3"><span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center ' + (e.t === 'po' ? 'b-green' : 'b-red') + '">' + icon(e.t === 'po' ? 'check' : 'shield', 15) + '</span><div class="min-w-0"><div class="text-sm font-semibold truncate">' + esc(e.msg) + '</div><div class="text-xs muted truncate">' + esc(e.sub) + '</div></div></div>';
+}).join('') || '<p class="muted text-sm">No activity yet.</p>';
+}
+function renderAgents() {
+var on = S.online;
+var lowCount = S.ledger.inventory.filter(function(i) { return Number(i.current_stock_tons) <= Number(i.reorder_point_tons); }).length;
+var riskStr = (on && S.telemetry) ? ('Risk ' + Math.round((S.telemetry.weather.delivery_risk_score || 0) * 100) + '% · ×' + S.telemetry.fuel.freight_cost_multiplier) : '—';
+var A = [
+{ n: 'Demand & Inventory Agent', r: 'Monitors stock vs reorder points', i: 'boxes', c: 'green', m: on ? (lowCount + ' reorder signals') : 'Offline' },
+{ n: 'Sourcing & MCDM Agent', r: 'Ranks vendors, negotiates', i: 'trend', c: 'gold', m: riskStr },
+{ n: 'Finance Validator', r: 'Deterministic math & budget', i: 'coins', c: 'gold', m: on ? (S.ledger.purchase_orders.length + ' POs validated') : 'Offline' },
+{ n: 'Security Gateway', r: '4-step zero-trust authorization', i: 'shield', c: 'red', m: on ? (S.ledger.audit_log.length + ' threats blocked') : 'Offline' }
+];
+$('agentCards').innerHTML = A.map(function(a) {
+return '<div class="rounded-xl p-4 flex gap-3 items-center transition hover:-translate-y-0.5" style="background:var(--bg2);border:1px solid var(--border)"><span class="w-11 h-11 rounded-xl flex items-center justify-center b-' + a.c + '">' + icon(a.i, 20) + '</span><div class="min-w-0 flex-1"><div class="flex justify-between items-center"><div class="text-sm font-semibold truncate">' + a.n + '</div><span class="badge ' + (on ? 'b-green' : 'b-red') + '"><span class="dot ' + (on ? 'pulse' : '') + '"></span>' + (on ? 'Online' : 'Offline') + '</span></div><div class="text-xs muted truncate">' + a.r + '</div><div class="text-[11px] mono mt-1" style="color:var(--gold)">' + esc(a.m) + '</div></div></div>';
+}).join('');
+}
+function chartDefaults() {
+if (!window.Chart) return;
+Chart.defaults.font.family = "'Inter',sans-serif";
+Chart.defaults.color = css('--tick');
+}
+function renderCharts() {
+if (!window.Chart) return;
+chartDefaults();
+var grid = css('--grid'), tick = css('--tick'), red = css('--red'), gold = css('--gold'), yellow = css('--yellow'), green = css('--green');
+var inv = S.ledger.inventory;
+if (S.charts.stock) S.charts.stock.destroy();
+if ($('stockChart') && inv.length) {
+S.charts.stock = new Chart($('stockChart'), {
+type: 'bar',
+data: {
+labels: inv.map(function(i) { return i.material_name.replace('Bulk ', ''); }),
+datasets: [
+{ label: 'Current stock', data: inv.map(function(i) { return i.current_stock_tons; }), backgroundColor: inv.map(function(i) { return stockStatus(i).c; }), borderRadius: 8, barPercentage: 0.65 },
+{ label: 'Reorder point', data: inv.map(function(i) { return i.reorder_point_tons; }), backgroundColor: gold + '66', borderColor: gold, borderWidth: 1.5, borderRadius: 8, barPercentage: 0.65 },
+{ label: 'Safety stock', data: inv.map(function(i) { return i.safety_stock_tons; }), backgroundColor: red + '44', borderColor: red, borderWidth: 1.5, borderRadius: 8, barPercentage: 0.65 }
+]
+},
+options: {
+responsive: true, maintainAspectRatio: false, animation: { duration: 700 },
+plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: tick } } },
+scales: { y: { beginAtZero: true, grid: { color: grid }, ticks: { color: tick } }, x: { grid: { display: false }, ticks: { color: tick } } }
+}
+});
+}
+var byV = {};
+S.ledger.purchase_orders.forEach(function(p) { byV[p.vendor_name] = (byV[p.vendor_name] || 0) + Number(p.total_landed_cost || 0); });
+var names = Object.keys(byV), vals = Object.values(byV), pal = [red, yellow, green, gold, '#D9641E', '#7A1712'];
+if (S.charts.spend) S.charts.spend.destroy();
+if ($('spendChart') && names.length) {
+S.charts.spend = new Chart($('spendChart'), {
+type: 'doughnut',
+data: { labels: names, datasets: [{ data: vals, backgroundColor: pal, borderColor: css('--surface'), borderWidth: 3, hoverOffset: 8 }] },
+options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
+});
+}
+var tot = vals.reduce(function(a, b) { return a + b; }, 0) || 1;
+$('spendLegend').innerHTML = names.map(function(n, i) {
+return '<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm" style="background:' + pal[i % pal.length] + '"></span><span class="truncate flex-1">' + esc(n) + '</span><span class="mono muted">' + Math.round((vals[i] / tot) * 100) + '%</span></div>';
+}).join('') || '<p class="muted">No spend yet.</p>';
+if (S.lastPipeline) renderMCDM(S.lastPipeline.candidate_suppliers || []);
+}
+function renderMCDM(c) {
+if (!window.Chart) return;
+if (S.charts.mcdm) { S.charts.mcdm.destroy(); S.charts.mcdm = null; }
+if (!c.length) {
+$('mcdmWeightsBadge').textContent = 'No surviving vendors';
+$('mcdmEmpty').style.display = 'block';
+$('mcdmEmpty').textContent = 'No vendors survived Phase-1 constraints.';
+return;
+}
+$('mcdmEmpty').style.display = 'none';
+var w = c[0].weights_applied || {};
+$('mcdmWeightsBadge').textContent = 'C ' + w.cost + ' · L ' + w.lead_time + ' · R ' + w.reliability;
+chartDefaults();
+S.charts.mcdm = new Chart($('mcdmChart'), {
+type: 'bar',
+data: {
+labels: c.map(function(x) { return x.vendor_id; }),
+datasets: [{ label: 'Composite MCDM Score', data: c.map(function(x) { return x.mcdm_score; }), backgroundColor: [css('--red'), css('--yellow'), css('--green')], borderRadius: 8, barPercentage: 0.6 }]
+},
+options: {
+responsive: true, maintainAspectRatio: false, animation: { duration: 900 },
+scales: { y: { beginAtZero: true, max: 1, grid: { color: css('--grid') }, ticks: { color: css('--tick') } }, x: { grid: { display: false }, ticks: { color: css('--tick') } } },
+plugins: { legend: { display: false } }
+}
+});
+}
+function setStep(i, state) {
+var el = document.querySelector('.step[data-step="' + i + '"]');
+if (!el) return;
+el.classList.remove('running', 'done', 'fail');
+if (state) el.classList.add(state);
+var ico = el.querySelector('.ico');
+var base = ['boxes', 'trend', 'coins', 'shield'][i];
+ico.innerHTML = icon(state === 'done' ? 'check' : (state === 'fail' ? 'x' : base), 16);
+}
+function verdictBadge(id, text, ok) {
+var e = $(id);
+e.textContent = text;
+e.className = 'badge ' + (ok === null ? 'b-muted' : (ok ? 'b-green' : 'b-red'));
+}
+async function runPipeline(ev) {
+var btn = $('runPipelineBtn');
+btn.disabled = true;
+$('runBtnText').textContent = 'Orchestrating 4-Agent Pipeline…';
+[0, 1, 2, 3].forEach(function(i) { setStep(i, null); });
+verdictBadge('financeVerdict', 'WAITING', null);
+verdictBadge('gatewayVerdict', 'WAITING', null);
+$('pipeStatusBadge').className = 'badge b-gold';
+$('pipeStatusBadge').innerHTML = '<span class="dot pulse"></span> Running';
+var payload = {
+material_name: $('matName').value,
+required_tonnage: parseFloat($('tonnage').value),
+inventory_urgency_days: parseInt($('urgency').value, 10),
+transport_distance_km: parseFloat($('distance').value),
+budget_cap: parseFloat($('budgetCap').value),
+agent_id: $('agentId').value,
+simulated_environment: $('simEnv').value
+};
+var k = 0;
+setStep(0, 'running');
+var anim = setInterval(function() {
+if (k < 2) { setStep(k, 'done'); k++; setStep(k, 'running'); }
+}, 850);
+try {
+var results = await Promise.all([
+api('/api/run-pipeline', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
+new Promise(function(r) { setTimeout(r, 1800); })
+]);
+var data = results[0];
+clearInterval(anim);
+S.lastPipeline = data;
+var fin = data.finance_audit_status === 'APPROVED';
+var gw = (data.gateway_status || '').includes('AUTHORIZED');
+setStep(0, 'done');
+setStep(1, 'done');
+setStep(2, fin ? 'done' : 'fail');
+setStep(3, (fin && gw) ? 'done' : 'fail');
+$('traceContainer').innerHTML = (data.explainability_trace || []).map(function(t, i) {
+return '<div class="p-3 rounded-xl" style="background:var(--bg2);border:1px solid var(--border);animation:fadeUp .4s ' + (i * 0.08) + 's both"><div class="flex items-center gap-2"><span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold" style="background:var(--gold);color:#3a2300">' + (i + 1) + '</span><span class="font-semibold" style="color:var(--gold)">' + esc(t.agent) + '</span></div><p class="mt-1.5 leading-relaxed">' + esc(t.logic) + '</p></div>';
+}).join('');
+verdictBadge('financeVerdict', data.finance_audit_status, fin);
+verdictBadge('gatewayVerdict', data.gateway_status, gw);
+$('pipeStatusBadge').className = 'badge ' + ((fin && gw) ? 'b-green' : 'b-red');
+$('pipeStatusBadge').textContent = (fin && gw) ? 'Completed' : 'Blocked';
+$('poOutput').textContent = data.po_document || ('TRANSACTION NOT COMMITTED\n\nFinance Verdict: ' + data.finance_audit_status + '\nReason: ' + data.finance_audit_reason + '\nGateway: ' + data.gateway_status);
+renderMCDM(data.candidate_suppliers || []);
+toast((fin && gw) ? 'Purchase order generated and authorized.' : 'Transaction blocked by governance layer.', (fin && gw) ? 'ok' : 'err', (fin && gw) ? 'Pipeline complete' : 'Pipeline blocked');
+loadLedger();
+} catch (err) {
+clearInterval(anim);
+[0, 1, 2, 3].forEach(function(i) { setStep(i, 'fail'); });
+verdictBadge('financeVerdict', 'OFFLINE', false);
+verdictBadge('gatewayVerdict', 'OFFLINE', false);
+$('pipeStatusBadge').className = 'badge b-red';
+$('pipeStatusBadge').textContent = 'Backend Offline';
+} finally {
+btn.disabled = false;
+$('runBtnText').textContent = 'Execute 4-Agent S2P Pipeline';
+}
+}
+function copyPO() {
+if (navigator.clipboard) {
+navigator.clipboard.writeText($('poOutput').textContent).then(function() { toast('Purchase order copied to clipboard.', 'ok'); });
+}
+}
+/* ============================================================
+VOICE + CLAUDE-STYLE SIDE-BY-SIDE WHAT-IF SIMULATOR
+============================================================ */
+var voiceRecognitionInstance = null;
+var isVoiceActive = false;
+function toggleVoice() {
+if (isVoiceActive) stopVoice();
+else startVoice();
+}
+function startVoice() {
+var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRec) {
+toast('Speech recognition requires Google Chrome or Microsoft Edge.', 'err', 'Voice API');
+return;
+}
+try {
+voiceRecognitionInstance = new SpeechRec();
+voiceRecognitionInstance.continuous = false;
+voiceRecognitionInstance.interimResults = true;
+voiceRecognitionInstance.lang = 'en-US';
+var btn = $('nlpMicBtn');
+var indicator = $('listeningIndicator');
+var input = $('nlpInput');
+isVoiceActive = true;
+btn.classList.add('voice-active');
+indicator.classList.remove('hidden');
+indicator.classList.add('inline-flex');
+voiceRecognitionInstance.onresult = function(e) {
+var currentTranscript = '';
+for (var i = e.resultIndex; i < e.results.length; i++) {
+currentTranscript += e.results[i][0].transcript;
+}
+input.value = currentTranscript;
+};
+voiceRecognitionInstance.onerror = function() { stopVoice(); };
+voiceRecognitionInstance.onend = function() {
+stopVoice();
+var finalTxt = (input.value || '').trim();
+if (finalTxt.split(/\s+/).length >= 3) runWhatIf();
+};
+voiceRecognitionInstance.start();
+} catch(err) {
+stopVoice();
+}
+}
+function stopVoice() {
+isVoiceActive = false;
+if (voiceRecognitionInstance) {
+try { voiceRecognitionInstance.stop(); } catch(e) {}
+voiceRecognitionInstance = null;
+}
+var btn = $('nlpMicBtn');
+var indicator = $('listeningIndicator');
+if (btn) btn.classList.remove('voice-active');
+if (indicator) {
+indicator.classList.add('hidden');
+indicator.classList.remove('inline-flex');
+}
+}
+function fillAndRunNLP(scenarioText) {
+$('nlpInput').value = scenarioText;
+runWhatIf();
+}
+async function runWhatIf() {
+var btn = $('wiBtn');
+var rawPrompt = ($('nlpInput').value || '').trim();
+if (!rawPrompt) {
+toast('Please type or speak a scenario first.', 'err');
+return;
+}
+btn.disabled = true;
+var originalText = btn.innerHTML;
+btn.innerHTML = '<span class="dot pulse"></span> Analyzing…';
+try {
+var data = await api('/api/what-if', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ prompt: rawPrompt })
+});
+var hasGap = (data.stockout_days_gap || 0) > 0;
+var vCls = data.verdict === 'APPROVED_IN_SANDBOX' ? 'b-green' : (hasGap ? 'b-red' : 'b-gold');
+var assumpHtml = (data.assumptions || []).map(function(a) {
+return '<li class="flex items-start gap-2"><span style="color:var(--gold)">•</span><span>' + esc(a) + '</span></li>';
+}).join('');
+var tableRows = (data.comparison_table || []).map(function(r) {
+return '<tr><td class="font-semibold">' + esc(r.metric) + '</td><td class="mono">' + esc(r.baseline) + '</td><td class="mono font-bold" style="color:var(--gold)">' + esc(r.scenario) + '</td></tr>';
+}).join('');
+var h = '<div class="w-full text-left space-y-4 animation-fadeUp">' +
+'<div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b" style="border-color:var(--border)">' +
+'<div class="text-base font-bold leading-snug">' + esc(data.headline || ('Scenario Analysis: ' + data.material_name)) + '</div>' +
+'<div class="flex items-center gap-2">' +
+'<span class="badge ' + vCls + '">' + esc(data.verdict) + '</span>' +
+'<span class="badge b-muted mono">ZERO_DB_WRITES</span>' +
+'</div>' +
+'</div>';
+if (assumpHtml) {
+h += '<div><div class="eyebrow mb-1.5">Assumptions & Live Inventory Context</div><ul class="space-y-1 text-xs muted">' + assumpHtml + '</ul></div>';
+}
+if (tableRows) {
+h += '<div class="overflow-x-auto rounded-xl border" style="border-color:var(--border);background:var(--surface)">' +
+'<table class="t">' +
+'<thead><tr><th>Metric</th><th>Order Now (Day 0)</th><th>Scenario (' + (data.price_shock_pct ? (data.price_shock_pct + '% Shock · ') : '') + 'Day ' + data.delay_restock_days + ')</th></tr></thead>' +
+'<tbody>' + tableRows + '</tbody>' +
+'</table>' +
+'</div>';
+}
+h += '<div class="p-3.5 rounded-xl text-xs leading-relaxed font-medium" style="background:var(--surface);border:1px dashed ' + (hasGap ? 'var(--red)' : 'var(--gold)') + '">' + esc(data.recommendation) + '</div></div>';
+$('wiResults').innerHTML = h;
+toast('Comparative trade-off analysis complete.', 'ok', 'What-If Copilot');
+} catch (err) {
+$('wiResults').innerHTML = '<div class="text-sm" style="color:var(--red)">❌ Sandbox Error: ' + esc(err.message) + '</div>';
+} finally {
+btn.disabled = false;
+btn.innerHTML = originalText;
+}
+}
+async function runSimulation() {
+var btn = $('simBtn');
+btn.disabled = true;
+$('simBtnText').textContent = 'Running 12 Tests…';
+$('simSuiteDrawer').classList.remove('hidden');
+$('simTableBody').innerHTML = Array.from({ length: 4 }, function() { return '<tr><td colspan="4"><div class="skel h-6 my-1">.</div></td></tr>'; }).join('');
+try {
+var data = await api('/api/simulate', { method: 'POST' });
+var passed = data.results.filter(function(r) { return r.passed; }).length;
+var total = data.results.length || 12;
+var ok = passed === total;
+var sb = $('simScoreBadge');
+sb.classList.remove('hidden');
+sb.textContent = data.score;
+sb.className = 'badge mono ' + (ok ? 'b-green' : 'b-red');
+$('simTableBody').innerHTML = data.results.map(function(r) {
+return '<tr><td class="font-semibold">' + esc(r.scenario) + '</td><td class="mono text-xs muted">' + esc(r.expected) + '</td><td class="mono text-xs" style="color:var(--gold)">' + esc(r.actual) + '</td><td><span class="badge ' + (r.passed ? 'b-green' : 'b-red') + '">' + (r.passed ? '✓ PASS' : '✕ FAIL') + '</span></td></tr>';
+}).join('');
+toast(passed + '/' + total + ' scenarios passed.', ok ? 'ok' : 'err', 'Stress Suite Complete');
+} catch (err) {
+toast('Cannot run simulation while backend is offline.', 'err');
+} finally {
+btn.disabled = false;
+$('simBtnText').textContent = 'Run 12 Stress Tests';
+}
+}
+async function searchPolicy() {
+var q = $('policyInput').value.trim();
+if (!q) return;
+$('policyResult').innerHTML = '<div class="space-y-2"><div class="skel h-4 w-3/4">.</div><div class="skel h-4 w-full">.</div></div>';
+try {
+var data = await api('/api/policy-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q }) });
+$('policyResult').textContent = data.result;
+} catch (err) {
+$('policyResult').innerHTML = '<span style="color:var(--red)">❌ FastAPI backend offline.</span>';
+}
+}
+function quickPolicy(q) { $('policyInput').value = q; searchPolicy(); }
+var palSel = 0;
+function paletteItems() {
+var q = ($('palInput').value || '').toLowerCase();
+var items = TABS.map(function(t) { return { label: 'Go to ' + t.label, icon: t.icon, run: function() { switchTab(t.id); } }; }).concat([
+{ label: 'Toggle light / dark theme', icon: 'moon', run: toggleTheme },
+{ label: 'Refresh all data', icon: 'refresh', run: function() { refreshAll(true); } },
+{ label: 'Run 12-scenario stress suite', icon: 'shield', run: function() { switchTab('simulation'); runSimulation(); } },
+{ label: 'Simulate severe monsoon', icon: 'alert', run: function() {
+$('weatherLocationSelect').value = 'Mumbai_STORM'; syncEnv('top'); $('simEnv').value = 'Mumbai_STORM'; toast('Monsoon storm scenario active.', 'info');
+} }
+]);
+return items.filter(function(i) { return i.label.toLowerCase().includes(q); });
+}
+function renderPalette() {
+var it = paletteItems();
+palSel = Math.min(palSel, Math.max(0, it.length - 1));
+$('palList').innerHTML = it.map(function(x, i) {
+return '<div class="pal-item ' + (i === palSel ? 'sel' : '') + '" onclick="palRun(' + i + ')">' + icon(x.icon, 16) + '<span>' + x.label + '</span></div>';
+}).join('') || '<div class="p-3 muted text-sm">No results</div>';
+}
+function palRun(i) { var it = paletteItems()[i]; if (it) { closePalette(); it.run(); } }
+function palKey(e) {
+var n = paletteItems().length;
+if (e.key === 'ArrowDown') { palSel = (palSel + 1) % n; renderPalette(); e.preventDefault(); }
+else if (e.key === 'ArrowUp') { palSel = (palSel - 1 + n) % n; renderPalette(); e.preventDefault(); }
+else if (e.key === 'Enter') { palRun(palSel); }
+else if (e.key === 'Escape') { closePalette(); }
+}
+function openPalette() { $('palette').classList.add('open'); $('palInput').value = ''; palSel = 0; renderPalette(); setTimeout(function() { $('palInput').focus(); }, 30); }
+function closePalette() { $('palette').classList.remove('open'); }
+document.addEventListener('keydown', function(e) {
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); }
+if (e.key === 'Escape') { closePalette(); $('notifPanel').classList.add('hidden'); }
+});
+document.addEventListener('click', function(e) {
+var p = $('notifPanel');
+if (!p.classList.contains('hidden') && !p.contains(e.target) && !(e.target.closest && e.target.closest('.icon-btn'))) p.classList.add('hidden');
+});
+async function refreshAll(manual) {
+if (manual) {
+var b = $('refreshBtn').firstElementChild;
+if (b) {
+b.style.transition = 'transform .6s';
+b.style.transform = 'rotate(360deg)';
+setTimeout(function() { b.style.transition = 'none'; b.style.transform = 'none'; }, 650);
+}
+}
+await Promise.allSettled([loadTelemetry(), loadLedger(), loadCopilotInsights()]);
+if (manual && S.online) toast('Dashboard data refreshed from backend.', 'ok');
+}
+(function init() {
+hydrateIcons();
+buildNav();
+updateThemeIcon();
+renderManagerNotifs();
+tick();
+setInterval(tick, 1000);
+refreshAll(false);
+setInterval(loadLedger, 5000);
+setInterval(loadCopilotInsights, 8000);
+setInterval(loadTelemetry, 60000);
+})();
+</script>
+</body>
+</html>

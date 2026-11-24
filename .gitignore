@@ -1,0 +1,32 @@
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Vector database and local storage
+chroma_db/
+**/chroma_db/
+**/chromadb/
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
